@@ -18,5 +18,7 @@ Use: ./eye.sh -d thewebsite.com
 ### Installing dalfox/Gxss
 Install Go
 Use: Go build
+
+
 to install each one. make sure they are in ~/ dir or the script wont work
  
