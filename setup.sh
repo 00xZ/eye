@@ -72,6 +72,21 @@ if [ -d tools ]; then
 	echo "Your tools are installed under the tools directory"
 	#echo "${green}All set. Now just run SSRFire!${reset}"
 else
-	echo "${red}Make sure that you edit the 10th line in the ssrfire.sh file. Refer the github README for more details.${reset}"
+	echo "${red}Make sure that you edit the 10th line in the eye.sh file. Refer the github README for more details.${reset}"
 fi
+git clone https://github.com/KathanP19/Gxss
+cd Gxss
+echo "${green}Installing Gxss${reset}"
+go build
+cp ~/Gxss/Gxss /bin/Gxss
+echo "${cyan}Gxss Installed ${reset}"
+cd ~/
+git clone https://github.com/hahwul/dalfox
+cd dalfox
+go build
+echo "${green}Installing DalFox${reset}"
+cp dalfox /bin/dalfox
+echo "${cyan}Installed DalFox"${reset}"
+echo "${red}Installed All the stit."${reset}"
+
 echo "${yellow}If you encountered any error while installing due to reasons like go/python not installed, remove the tools directory using rm -rf tools, and run the script again."
