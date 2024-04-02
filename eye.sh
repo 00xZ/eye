@@ -6,66 +6,88 @@ yellow=`tput setaf 3`
 magenta=`tput setaf 5`
 cyan=`tput setaf 6`
 reset=`tput sgr0`
-echo "Usage: ./eye.sh -d domain.com -f custom_file.txt -c cookies"
-echo "domain.com        --- The domain for which you want to test"
-echo "custom_file.txt   --- Optional argument. You give your own custom URLs instead of using gau"
-echo "${cyan} 
+echo "${red}"
+echo "USE: -d domain.com"
+echo "     -f file_of_domains.txt"
 
-	[EYE]
-			                                                
-${green}- By Eyezik ${reset}
+echo "${green}________________________________
+
+        [Eye] (Exfiltrate Your Exploits)
+
+${magenta}	v0.0.2 - github/00xZ - discord/Zveu ${reset}
                                   "
 server=""
 file=""
 pwd
 while getopts "d:f:" opt
 do
-	case "${opt}" in 
-		d) 
-			domain="${OPTARG}"
-			;;
-		f)
-			file="${OPTARG}"
-			;;
-	esac
+        case "${opt}" in
+                d)
+                        domain="${OPTARG}"
+                        ;;
+                f)
+                        file="${OPTARG}"
+                        ;;
+        esac
 done
 if [[ ${domain:0:5} == "https" ]]; then
-	domain=${domain:8:${#domain}-8}
+        domain=${domain:8:${#domain}-8}
 elif [[ ${domain:0:4} == "http" ]]; then
-	domain=${domain:7:${domain}-7}
+        domain=${domain:7:${domain}-7}
 fi
 if [ -d output/$domain ]; then
-	echo "${red}An output folder with the same domain name already exists.${reset}"
-	read -p "Would you like to delete that folder and start fresh[y/n]: " delete
-	if [[ $delete == 'y' ]]; then
-		rm -rf output/$domain
-	else 
-		exit 2
-	fi
+        echo "${red} [!] An output folder with the same domain name already exists.${reset}"
+        read -p "Delete folder:[y/n]: " delete
+        if [[ $delete == 'y' ]]; then
+                rm -rf output/$domain
+        else
+                exit 2
+        fi
 fi
 mkdir output/$domain
 if [[ $file == "" ]]; then
-	read -p "Check subdomains? [y/n]: " sub
-	echo "${cyan}Fetching URLs using GAU (This may take some time depending on the domain. You can check the output generated till now at output/$domain/raw_urls.txt)"
-	echo -e "\n${yellow}If you don't want to wait, and want to test for the output generated till now.\n1. Exit this process\n2. Copy the output/$domain/raw_urls.txt to some other location outside of $domain folder\n3. Supply the file location as the third argument.\nEg ./eye.sh domain.com -f path/to/raw_urls.txt"
-	if [[ $sub == 'y' || $sub == 'Y' ]]; then
-		trap : SIGINT
-		gau_s $domain > output/$domain/raw_urls.txt
-	else 
-		trap : SIGINT
-		gau $domain > output/$domain/raw_urls.txt
-	fi
+        read -p "Deep scan(n) or light scan(y)? [y/n]: " sub
+        echo "${cyan}Output: output/$domain/raw_urls.txt)"
+        echo -e "\n"
+        if [[ $sub == 'y' || $sub == 'Y' ]]; then
+                trap : SIGINT
+                gau $domain > output/$domain/raw_urls.txt
+                #gau_s $domain > output/$domain/raw_urls.txt
+        else
+                trap : SIGINT
+                waymore -i $domain -oU output/$domain/raw_urls.txt
+        fi
 
-	echo -e "${green}Done${reset}\n"
-else 
-	cat $file > output/$domain/raw_urls.txt
+        echo -e "${green}Done${reset}\n"
+else
+        cat $file > output/$domain/raw_urls.txt
 fi
-uniq output/$domain/raw_urls.txt | grep "?" | sort | qsreplace ""  > output/$domain/temp-parameterised_urls.txt
-uniq output/$domain/raw_urls.txt | grep "?" | sort > output/$domain/gxss_tmp.txt
-cat output/$domain/gxss_tmp.txt | grep "=" >> output/$domain/gxss.txt
-cat output/$domain/temp-parameterised_urls.txt | grep "=" >> output/$domain/parameterised_urls.txt
-cat output/$domain/parameterised_urls.txt | qsreplace "'" > output/$domain/sqli.txt
-cat output/$domain/gxss.txt | ~/Gxss/./gxss -c 100 -o output/$domain/g_dump.txt
-cat output/$domain/g_dump.txt | sort -u | ~/dalfox/./dalfox pipe >> output/$domain/dalfox_dump
-cat output/$domain/dalfox_dump
-echo "Done"
+# Grab JS Files
+echo "${green} [!] Pulling all JS files [!] ${reset}"
+cat output/$domain/raw_urls.txt | grep -iE '\.js'|grep -ivE '\.json'|sort -u > output/$domain/javascript.txt
+
+### OR
+echo "${yellow} [x] Testing for Open Redirects [x] ${reset}"
+cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
+#cat output/$domain/raw_urls.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host \033[0;31mOPEN RED Vulnerable\n" ;done | tee output/$domain/open_redirect.txt ## may need fix
+### LFI
+echo "${cyan} [x] Local File Inclusion [x] ${reset}"
+cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
+#cat output/$domain/lfi.txt | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "LFI VULN! %"' | tee output/$domain/VULN-lfi.txt
+### SQL Injection
+cat output/$domain/raw_urls.txt | gf sqli > output/$domain/sqli.txt
+### SSTI
+cat output/$domain/raw_urls.txt | gf ssti > output/$domain/ssti.txt
+### SSRF
+cat output/$domain/raw_urls.txt | gf ssrf > output/$domain/ssrf.txt
+### IDOR
+cat output/$domain/raw_urls.txt | gf idor > output/$domain/idor.txt
+### XSS Testing
+echo "${cyan} [x] XSS Started [x] ${reset}"
+cat output/$domain/raw_urls.txt | gf xss | sort | uniq > output/$domain/xss.txt
+#cat output/$domain/xss.txt | trashcompactor > output/$domain/xss_alive.txt #FIX
+#cat output/$domain/xss_alive.txt | gxss -c 100 -o output/$domain/gxss_dump.txt 
+cat output/$domain/xss.txt | gxss -c 100 -o output/$domain/gxss_dump.txt
+
+#cat output/$domain/gxss_dump.txt | sort -u | tools/dalfox/./dalfox pipe >> output/$domain/VULN-xss.txt
+echo "${green}Find em bugs! Bye ~Eyezik${reset}"
