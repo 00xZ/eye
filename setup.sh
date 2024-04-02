@@ -5,6 +5,14 @@ yellow=`tput setaf 3`
 cyan=`tput setaf 6`
 reset=`tput sgr0`
 echo "${green}The Eye setup${reset}"
+echo "${cyab}Programs to Install:${reset}
+${green} gf
+ gxss
+ dalfox
+ ffuf
+ OpenRedireX
+ qsreplace
+                                  "
 chmod +x eye.sh
 if [ ! -d output ]; then
 	mkdir output
@@ -86,7 +94,17 @@ cd dalfox
 go build
 echo "${green}Installing DalFox${reset}"
 cp dalfox /bin/dalfox
+cd ..
 echo "${cyan}Installed DalFox"${reset}"
+python3 -m pip install waymore
+git clone https://github.com/tomnomnom/gf.git
+cd gf
+go build
+cp gf /bin/
+cd ..
+mkdir ~/.gf
+git clone https://github.com/1ndianl33t/Gf-Patterns.git
+cp Gf-Patterns/*.json ~/.gf/
 echo "${red}Installed All the stit."${reset}"
 
 echo "${yellow}If you encountered any error while installing due to reasons like go/python not installed, remove the tools directory using rm -rf tools, and run the script again."
