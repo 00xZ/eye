@@ -17,6 +17,12 @@ chmod +x eye.sh
 if [ ! -d output ]; then
 	mkdir output
 fi
+
+
+########## GAU
+
+
+
 echo "${red}Note: You must have go and python 3.7 installed for the tools to work${reset}"
 echo "${cyan}Installing gau... ${reset}"
 mkdir tools
@@ -38,6 +44,11 @@ gau_s(){
 cp tools/gau/main /bin/gau
 echo -e "\n"
 
+
+########## ffuf
+
+
+
 echo "${cyan}Installing ffuf... ${reset}"
 cd tools
 git clone https://github.com/ffuf/ffuf.git
@@ -46,10 +57,12 @@ cd ffuf
 go build main.go help.go
 chmod +x main
 cd ../..
-echo -e "ffuf(){
-	tools/ffuf/./main -u \$1 -w \$2 -b \$3 -c -t 100 
-}" >> .profile
-echo -e "\n"
+
+
+
+########## OpenRedireX
+
+
 
 
 echo "${cyan}Installing OpenRedireX... ${reset}"
@@ -62,6 +75,14 @@ echo -e "openredirex(){
 echo -e "${green}Done${reset}\n"
 
 
+
+
+########## qsreplace
+
+
+
+
+
 echo "${cyan}Installing qsreplace...${reset}"
 cd tools
 git clone https://github.com/tomnomnom/qsreplace
@@ -69,34 +90,43 @@ echo -e "Building the main.go file.\n${yellow}[Warning] This process fails if yo
 cd qsreplace
 go build main.go
 cd ../..
-echo -e "qsreplace(){
-	tools/qsreplace/./main \$1
-}" >> .profile
+
 cp tools/qsreplace/main /bin/qsreplace
 
-echo -e "\n"
-if [ -d tools ]; then
-	source .profile
-	echo "Your tools are installed under the tools directory"
-	#echo "${green}All set. Now just run SSRFire!${reset}"
-else
-	echo "${red}Make sure that you edit the 10th line in the eye.sh file. Refer the github README for more details.${reset}"
-fi
+
+
+
+########## Gxss
+
+
+
+
 git clone https://github.com/KathanP19/Gxss
 cd Gxss
 echo "${green}Installing Gxss${reset}"
 go build
-cp ~/Gxss/Gxss /bin/Gxss
+cp tools/Gxss /bin/Gxss
 echo "${cyan}Gxss Installed ${reset}"
-cd ~/
+cd ..
+
+########## Dalfox
+
+
 git clone https://github.com/hahwul/dalfox
 cd dalfox
 go build
 echo "${green}Installing DalFox${reset}"
 cp dalfox /bin/dalfox
 cd ..
-echo "${cyan}Installed DalFox"${reset}"
+echo "${cyan}Installed DalFox${reset}"
+
+########## waymore
+
+
 python3 -m pip install waymore
+
+########## gf and its patterns
+
 git clone https://github.com/tomnomnom/gf.git
 cd gf
 go build
@@ -105,6 +135,7 @@ cd ..
 mkdir ~/.gf
 git clone https://github.com/1ndianl33t/Gf-Patterns.git
 cp Gf-Patterns/*.json ~/.gf/
-echo "${red}Installed All the stit."${reset}"
+echo "${red} "
+gf -list
+echo "${green}IALL SET."${reset}"
 
-echo "${yellow}If you encountered any error while installing due to reasons like go/python not installed, remove the tools directory using rm -rf tools, and run the script again."
