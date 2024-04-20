@@ -12,7 +12,11 @@ also: chmod x+ *
 ### USE
 
 
-Use: ./eye.sh -d thewebsite.com
+Use: 
+#scan
+./eye.sh --scan thewebsite.com
+#exploit
+./eye.sh --exploit thewebsite.com
 
 
 ### Installing dalfox/Gxss
