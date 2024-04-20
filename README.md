@@ -13,10 +13,15 @@ also: chmod x+ *
 
 
 Use: 
+
 #scan
+
 ./eye.sh --scan thewebsite.com
+
 #exploit
+
 ./eye.sh --exploit thewebsite.com
+
 
 
 ### Installing dalfox/Gxss
