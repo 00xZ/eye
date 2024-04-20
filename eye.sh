@@ -1,93 +1,140 @@
 #!/bin/bash
-black=`tput setaf 0`
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-magenta=`tput setaf 5`
-cyan=`tput setaf 6`
-reset=`tput sgr0`
-echo "${red}"
-echo "USE: -d domain.com"
-echo "     -f file_of_domains.txt"
 
-echo "${green}________________________________
+## colors
+BOLD="\e[1m"
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+black='\033[0;30m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+magenta='\033[0;35m'
+NC='\033[0m' # No Color
+echo -e "$RED${BOLD} -                                                                  - ${NC}"
+echo -e "$CYAN${BOLD}███████╗██╗░░░██╗███████╗░██████╗██████╗░██╗░░░░░░█████╗░██╗████████╗${NC}"
+echo -e "$CYAN${BOLD}██╔════╝╚██╗░██╔╝██╔════╝██╔════╝██╔══██╗██║░░░░░██╔══██╗██║╚══██╔══╝${NC}"
+echo -e "$CYAN${BOLD}█████╗░░░╚████╔╝░█████╗░░╚█████╗░██████╔╝██║░░░░░██║░░██║██║░░░██║░░░${NC}"
+echo -e "$CYAN${BOLD}██╔══╝░░░░╚██╔╝░░██╔══╝░░░╚═══██╗██╔═══╝░██║░░░░░██║░░██║██║░░░██║░░░${NC}"
+echo -e "$CYAN${BOLD}███████╗░░░██║░░░███████╗██████╔╝██║░░░░░███████╗╚█████╔╝██║░░░██║░░░${NC}"
+echo -e "$CYAN${BOLD}╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░╚═╝░░░░░╚══════╝░╚════╝░╚═╝░░░╚═╝░░░${NC}"
+echo -e "$RED${BOLD} -                                                                  - ${NC}"
+echo -e "$magenta Scan/Exploit - by @$green${BOLD}00xZ$NC /$green${BOLD} Eyezik     ${NC}"
 
-        [Eye] (Exfiltrate Your Exploits)
+echo " "
+help() {
+    echo -e "$CYAN${BOLD}Usage:${NC}"
+    echo -e "${BOLD}    --help            Shows the help menu${NC}"
+    echo -e "${BOLD}    --scan           Subdomains/gau(website history)/pars{NC}"
+    echo -e "${BOLD}    --exploit           Subenum + alive + params + vuln${NC}"
+    exit 0
+}
 
-${magenta}	v0.0.2 - github/00xZ - discord/Zveu ${reset}
-                                  "
-server=""
-file=""
-pwd
-while getopts "d:f:" opt
-do
-        case "${opt}" in
-                d)
-                        domain="${OPTARG}"
-                        ;;
-                f)
-                        file="${OPTARG}"
-                        ;;
-        esac
-done
-if [[ ${domain:0:5} == "https" ]]; then
-        domain=${domain:8:${#domain}-8}
-elif [[ ${domain:0:4} == "http" ]]; then
-        domain=${domain:7:${domain}-7}
+if [ "$1" == "--help" ]; then
+    help
 fi
-if [ -d output/$domain ]; then
-        echo "${red} [!] An output folder with the same domain name already exists.${reset}"
-        read -p "Delete folder:[y/n]: " delete
+
+domain=$2
+#if [ -z "$domain" ]; then
+#    echo -e "${RED}Please provide a domain.${NC}"
+#    help
+#fi
+#if [[ ${domain:0:5} == "https" ]]; then
+#        domain=${domain:8:${#domain}-8}
+#elif [[ ${domain:0:4} == "http" ]]; then
+#        domain=${domain:7:${domain}-7}
+#fi
+#if [ -d output/$domain ]; then
+#        echo -e "$RED${BOLD} [!] An output folder with the same domain name already exists."
+#        echo -e "$yellow Delete folder:[ $green y $yellow / $RED n $yellow ]: "
+#        read -p " " delete
+#        if [[ $delete == 'y' ]]; then
+#                rm -rf output/$domain
+#        else
+#                exit 2
+#        fi
+#fi
+#mkdir -p output/$domain/
+#mkdir -p output/$domain/xray
+
+vuln1() {
+	if [[ ${domain:0:5} == "https" ]]; then
+            domain=${domain:8:${#domain}-8}
+    elif [[ ${domain:0:4} == "http" ]]; then
+            domain=${domain:7:${domain}-7}
+    fi
+    if [ -d output/$domain ]; then
+        echo -e "$RED${BOLD} [!] An output folder with the same domain name already exists."
+        echo -e "$yellow Delete folder:[ $green y $yellow / $RED n $yellow ]: "
+        read -p " " delete
         if [[ $delete == 'y' ]]; then
                 rm -rf output/$domain
         else
                 exit 2
         fi
-fi
-mkdir output/$domain
-if [[ $file == "" ]]; then
-        read -p "Deep scan(n) or light scan(y)? [y/n]: " sub
-        echo "${cyan}Output: output/$domain/raw_urls.txt)"
-        echo -e "\n"
-        if [[ $sub == 'y' || $sub == 'Y' ]]; then
-                trap : SIGINT
-                gau $domain > output/$domain/raw_urls.txt
-                #gau_s $domain > output/$domain/raw_urls.txt
-        else
-                trap : SIGINT
-                waymore -i $domain -oU output/$domain/raw_urls.txt
-        fi
+    fi
+    mkdir -p output/$domain/
+    #mkdir -p output/$domain/xray
+    read -p " [?] Deep scan(d) or light scan(l)? [d/l]: " sub
+    echo -e "$magenta Output: output/$domain/raw_urls.txt)"
+    echo -e "\n"
+    if [[ $sub == 'l' || $sub == 'L' ]]; then
+            trap : SIGINT
+            echo -e "$green [+]$CYAN Get All Urls "
+            gau $domain > output/$domain/raw_urls.txt
+            echo -e "$green [+]$RED Sub Finder "
+            subfinder -d $domain -silent -all | anew output/$domain/subs.txt
+            echo -e "$green [+]$yellow Sub Life Check "
+            cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
+            #gau_s $domain > output/$domain/raw_urls.txt
+    else
+            trap : SIGINT
+            waymore -i $domain -oU output/$domain/raw_urls.txt
+    fi
+    #if [ "$3" == "--sub" ]; then
+    #    subfinder -d $domain -silent -all | anew output/$domain/subs.txt
+        #findomain --taget $domain --quiet | anew
+    #    cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
+    #elif [ "$3" == "--deep-sub" ]; then
+    #    echo -e "${RED} ADDING SOON ${NC}"
+    #    #./deepsub --domain 
+    #else
+    #    echo -e "${RED} Not Scanning Subdomains ${NC}"
+    #fi
+    echo $2
+    echo -e "$CYAN${BOLD} [+] Parsing ${NC}"
+    cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
+    cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
+    cat output/$domain/raw_urls.txt | gf sqli > output/$domain/sqli.txt
+    cat output/$domain/raw_urls.txt | gf ssti > output/$domain/ssti.txt
+    cat output/$domain/raw_urls.txt | gf ssrf > output/$domain/ssrf.txt
+    cat output/$domain/raw_urls.txt | gf idor > output/$domain/idor.txt
+    cat output/$domain/raw_urls.txt | gf xss | sort | uniq > output/$domain/xss.txt
+    echo -e "$green [+]$magenta Life Check "
+    cat output/$domain/xss.txt | trashcompactor | anew output/$domain/reflected_alive.txt #FIX
+    cat output/$domain/xss.txt | gxss -c 100 | anew output/$domain/gxss_dump.txt
+}
 
-        echo -e "${green}Done${reset}\n"
+vuln2() {
+    mkdir -p output/$domain/xray
+    echo -e "$CYAN$HTTP Scanning ${NC}"
+    httpx -silent -l output/$domain/subs.txt | anew output/$domain/alive.txt
+
+    echo -e "$CYANParameters search${NC}"
+    paramspider -l output/$domain/alive.txt && mv results output/$domain/
+    #cd results/
+    cat output/$domain/results/* > output/$domain/params.txt
+
+    echo -e "$RED${BOLD} \n Vulnerability Scanning \n${NC}"
+    cd tools/
+    nuclei ../output/$domain/params.txt -t ~/nuclei-templates -es info,unknown -etags ssl,tcp,code,javascript,whois | anew ../output/$domain/_nuclei.txt
+    cat ../output/$domain/params.txt | xargs -I @ sh -c './xray_linux_amd64 ws --url @ --plugins xss,sqldet,xxe,ssrf,cmd-injection,path-traversal,crlf-injection,dirscan --html-output ../output/$domain/xray/"xray_$(echo @ | tr / _).html"'
+}
+
+if [ "$1" == "--scan" ]; then
+    vuln1
+elif [ "$1" == "--exploit" ]; then
+    vuln2
 else
-        cat $file > output/$domain/raw_urls.txt
+    echo -e "${RED}Unknown option: $1 ${NC}"
+    help
 fi
-# Grab JS Files
-echo "${green} [!] Pulling all JS files [!] ${reset}"
-cat output/$domain/raw_urls.txt | grep -iE '\.js'|grep -ivE '\.json'|sort -u > output/$domain/javascript.txt
 
-### OR
-echo "${yellow} [x] Testing for Open Redirects [x] ${reset}"
-cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
-#cat output/$domain/raw_urls.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host \033[0;31mOPEN RED Vulnerable\n" ;done | tee output/$domain/open_redirect.txt ## may need fix
-### LFI
-echo "${cyan} [x] Local File Inclusion [x] ${reset}"
-cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
-#cat output/$domain/lfi.txt | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "LFI VULN! %"' | tee output/$domain/VULN-lfi.txt
-### SQL Injection
-cat output/$domain/raw_urls.txt | gf sqli > output/$domain/sqli.txt
-### SSTI
-cat output/$domain/raw_urls.txt | gf ssti > output/$domain/ssti.txt
-### SSRF
-cat output/$domain/raw_urls.txt | gf ssrf > output/$domain/ssrf.txt
-### IDOR
-cat output/$domain/raw_urls.txt | gf idor > output/$domain/idor.txt
-### XSS Testing
-echo "${cyan} [x] XSS Started [x] ${reset}"
-cat output/$domain/raw_urls.txt | gf xss | sort | uniq > output/$domain/xss.txt
-#cat output/$domain/xss.txt | trashcompactor > output/$domain/xss_alive.txt #FIX
-#cat output/$domain/xss_alive.txt | gxss -c 100 -o output/$domain/gxss_dump.txt 
-cat output/$domain/xss.txt | gxss -c 100 -o output/$domain/gxss_dump.txt
-
-#cat output/$domain/gxss_dump.txt | sort -u | tools/dalfox/./dalfox pipe >> output/$domain/VULN-xss.txt
-echo "${green}Find em bugs! Bye ~Eyezik${reset}"
