@@ -23,6 +23,11 @@ Use:
 ./eye.sh --exploit thewebsite.com
 
 
+## Tools
+
+Inside tools is xray : https://github.com/evilsocket/xray 
+
+along with the configs feel free to delete and install in the directory yourself
 
 ### Installing dalfox/Gxss
 Install Go
