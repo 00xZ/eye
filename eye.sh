@@ -34,27 +34,7 @@ if [ "$1" == "--help" ]; then
 fi
 
 domain=$2
-#if [ -z "$domain" ]; then
-#    echo -e "${RED}Please provide a domain.${NC}"
-#    help
-#fi
-#if [[ ${domain:0:5} == "https" ]]; then
-#        domain=${domain:8:${#domain}-8}
-#elif [[ ${domain:0:4} == "http" ]]; then
-#        domain=${domain:7:${domain}-7}
-#fi
-#if [ -d output/$domain ]; then
-#        echo -e "$RED${BOLD} [!] An output folder with the same domain name already exists."
-#        echo -e "$yellow Delete folder:[ $green y $yellow / $RED n $yellow ]: "
-#        read -p " " delete
-#        if [[ $delete == 'y' ]]; then
-#                rm -rf output/$domain
-#        else
-#                exit 2
-#        fi
-#fi
-#mkdir -p output/$domain/
-#mkdir -p output/$domain/xray
+
 
 vuln1() {
 	if [[ ${domain:0:5} == "https" ]]; then
@@ -73,7 +53,6 @@ vuln1() {
         fi
     fi
     mkdir -p output/$domain/
-    #mkdir -p output/$domain/xray
     read -p " [?] Deep scan(d) or light scan(l)? [d/l]: " sub
     echo -e "$magenta Output: output/$domain/raw_urls.txt)"
     echo -e "\n"
@@ -85,23 +64,13 @@ vuln1() {
             subfinder -d $domain -silent -all | anew output/$domain/subs.txt
             echo -e "$green [+]$yellow Sub Life Check "
             cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
-            #gau_s $domain > output/$domain/raw_urls.txt
     else
             trap : SIGINT
             waymore -i $domain -oU output/$domain/raw_urls.txt
     fi
-    #if [ "$3" == "--sub" ]; then
-    #    subfinder -d $domain -silent -all | anew output/$domain/subs.txt
-        #findomain --taget $domain --quiet | anew
-    #    cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
-    #elif [ "$3" == "--deep-sub" ]; then
-    #    echo -e "${RED} ADDING SOON ${NC}"
-    #    #./deepsub --domain 
-    #else
-    #    echo -e "${RED} Not Scanning Subdomains ${NC}"
-    #fi
+    
     echo $2
-    echo -e "$CYAN${BOLD} [+] Parsing ${NC}"
+    echo -e "$CYAN${BOLD} [+] Parsing ${NC}" #GF is a grep wrapper using a set of paramiters to check for whats most likely to match the given exploit
     cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
     cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
     cat output/$domain/raw_urls.txt | gf sqli > output/$domain/sqli.txt
@@ -114,8 +83,8 @@ vuln1() {
     cat output/$domain/xss.txt | gxss -c 100 | anew output/$domain/gxss_dump.txt
     echo -e "$yellow [+]$green Finding Hidden Files "
     cat output/$domain/raw_urls.txt | grep -color -E ".xls | \\. xml | \\.xlsx | \\.json | \\. pdf | \\.sql | \\. doc| \\.docx | \\. pptx| \\.txt| \\.zip| \\.tar.gz| \\.tgz| \\.bak| \\.7z| \\.rar" | anew output/$domain/hidden_files.txt
-    cat output/$domain/subs.txt| httpx -silent | anew output/$domain/subs_alive.txt
-    #dirsearch -l output/$domain/subs_alive.txt -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip,log,xml,js,json --deep-recursive --force-recursive --exclude-sizes=0B --random-agent --full-url -o output/$domain/hidden_dir.txt
+    cat output/$domain/subs.txt| httpx -silent | anew output/$domain/subs_alive.txt #dirsearch makes you use the full path dir /root/eye/output/... instead of output/....
+    dirsearch -l ~/eye/output/$domain/subs_alive.txt -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip,log,xml,js,json --deep-recursive --force-recursive --exclude-sizes=0B --random-agent --full-url -o ~/eye/output/$domain/hidden_dir.txt
 
 }
 
