@@ -27,7 +27,7 @@ Use:
 
 ./eye.sh --scan thewebsite.com
 
-![screenshot] https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(21).png
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(21).png?raw=true)
 
 #exploit
 
