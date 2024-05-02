@@ -12,7 +12,18 @@ ${green} gf
  ffuf
  OpenRedireX
  qsreplace
+ parallel
+ ghauri
+ anew
+ subfinder
+ waymore
+ httpx
+ dirsearch
+ paramspider
+ nuclei
+ xray
                                   "
+echo "${green}Your best bet is to install these by hand for now, besides xray which if you do put it into the tools/ dir${reset}"
 chmod +x eye.sh
 if [ ! -d output ]; then
 	mkdir output
@@ -125,8 +136,15 @@ echo "${cyan}Installed DalFox${reset}"
 
 python3 -m pip install waymore
 
-########## gf and its patterns
+########## ghauri
+cd tools
+git clone https://github.com/r0oth3x49/ghauri.git
+cd ghauri
+python3 -m pip install --upgrade -r requirements.txt
+python3 setup.py install
+cd ..
 
+########## gf and its patterns
 git clone https://github.com/tomnomnom/gf.git
 cd gf
 go build
@@ -138,4 +156,3 @@ cp Gf-Patterns/*.json ~/.gf/
 echo "${red} "
 gf -list
 echo "${green}IALL SET."${reset}"
-
