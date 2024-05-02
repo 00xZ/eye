@@ -143,6 +143,10 @@ cd ghauri
 python3 -m pip install --upgrade -r requirements.txt
 python3 setup.py install
 cd ..
+############### Xray
+wget https://github.com/chaitin/xray/releases/download/1.9.11/xray_linux_amd64.zip
+unzip xray_linux_amd64.zip
+echo "xray installed"
 
 ########## gf and its patterns
 git clone https://github.com/tomnomnom/gf.git
