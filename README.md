@@ -37,6 +37,7 @@ Use:
 
 ./eye.sh --custom thewebsite.com
 
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(23).png?raw=true)
 
 ## Tools
 
