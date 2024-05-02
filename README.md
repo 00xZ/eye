@@ -27,6 +27,8 @@ Use:
 
 ./eye.sh --scan thewebsite.com
 
+https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(21).png
+
 #exploit
 
 ./eye.sh --exploit thewebsite.com
