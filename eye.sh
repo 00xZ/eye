@@ -17,7 +17,7 @@ echo -e "$CYAN${BOLD}██╔══╝░░░░╚██╔╝░░██�
 echo -e "$CYAN${BOLD}███████╗░░░██║░░░███████╗██████╔╝██║░░░░░███████╗╚█████╔╝██║░░░██║░░░${NC}"
 echo -e "$CYAN${BOLD}╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░╚═╝░░░░░╚══════╝░╚════╝░╚═╝░░░╚═╝░░░${NC}"
 echo -e "$RED${BOLD} -                                                                  - ${NC}"
-echo -e "$magenta Scan/Exploit - by @$green${BOLD}00xZ$NC /$green${BOLD} Eyezik     ${NC}"
+echo -e "$magenta Scan/Exploit - by @$green${BOLD}00xZ$NC /$green${BOLD} Eyezik$NC /$green${BOLD} Discord: Zveu ${NC}"
 
 echo " "
 help() {
