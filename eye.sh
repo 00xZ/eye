@@ -135,11 +135,11 @@ vuln2() {
 }
 
 vuln3() {
-	echo -e "$RED$Custom Exploit Scan ${NC}"
-
+	echo -e "$RED${BOLD} --- $green${BOLD}Custom Exploit Scan $RED${BOLD}--- ${NC} \n"
+    echo -e "$CYAN${BOLD} \n [!] XSS Scan: \n${NC}"
     cat output/$domain/gxss_dump.txt | dalfox pipe -o cat output/$domain/VULN_xss.txt
     [ -s output/$domain/VULN_xss.txt ] && echo -e "$green${BOLD} [+] VULN XSS [+] Check output/$domain/VULN_xss.txt for output ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
-    echo -e "$CYAN${BOLD} \n [!] CSRF [!] \n${NC}"
+    echo -e "$CYAN${BOLD} \n [!] CSRF Scan: \n${NC}"
     crlfuzz -l output/$domain/subs.txt -o output/$domain/VULN_csrf.txt
     [ -s output/$domain/VULN_csrf.txt ] && echo -e "$green${BOLD} [+] VULN CSRF [+] Check output/$domain/VULN_csrf.txt for output ${NC}" || echo -e "$RED [+] No CSRF Found[+] ${NC}"
 
