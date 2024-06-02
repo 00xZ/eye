@@ -13,5 +13,6 @@ do
 	cat database.txt | grep "200" | awk '{print $1}' | anew all.txt
 	rm ips.txt
 	rm target.txt
+ 	killall gdn
 	echo " [!] LOOP [!] "
 done
