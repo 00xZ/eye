@@ -1,7 +1,7 @@
 while true
 do
 	echo " Scanning For Random Servers "
-	zmap -N 15 -p 443 -o ips.txt -B 100M
+	zmap -N 5 -p 443 -o ips.txt
 	echo " [+] Pulling URLs From IP [+] "
 	gdn ips.txt | awk '{print $2}' | sort -u > target.txt
 		echo " [+] Grabbing info[+] "
