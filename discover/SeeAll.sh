@@ -11,4 +11,5 @@ do
 	rm ips.txt
 	rm target.txt
 	echo " [!] LOOP [!] "
+	killall gdn
 done
