@@ -91,4 +91,9 @@ cd ..
 wget https://github.com/projectdiscovery/subfinder/releases/download/v2.6.6/subfinder_2.6.6_linux_amd64.zip
 unzip subfinder_2.6.6_linux_amd64.zip
 mv subfinder /bin/
+git clone https://github.com/projectdiscovery/httpx.git
+cd httpx/cmd/httpx
+go build
+mv httpx /bin/
+cd ~/downloads/
 echo "${cyan}Done${reset}"
