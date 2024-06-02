@@ -72,4 +72,6 @@ paramspider ( https://github.com/devanshbatham/ParamSpider )
 httpx ( https://github.com/projectdiscovery/httpx )
 
 parallel ( https://github.com/parallel-finance/parallel )
+
+gdn ( https://github.com/kmskrishna/gdn )
  
