@@ -1,7 +1,14 @@
 #!/bin/bash
 while true
 do
-	zmap -N 7 -p 443 -o ips.txt -B 100M
+	killall gdn
+	clear
+	echo "              "
+	echo "              "
+	echo "           Finding IPs  "
+	echo "              "
+	echo "              "
+	zmap -N 7 -p 443 -o ips.txt -B 4M
 	echo " 10 Sec Sleep... yes its needed "
 	sleep 10
 	cat ips.txt | gdn |awk '{print $2}' | tee targets.txt
@@ -13,6 +20,6 @@ do
 	cat database.txt | grep "200" | awk '{print $1}' | anew all.txt
 	rm ips.txt
 	rm target.txt
- 	killall gdn
+	cat all.txt
 	echo " [!] LOOP [!] "
 done
