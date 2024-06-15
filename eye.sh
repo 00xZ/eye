@@ -26,6 +26,10 @@ help() {
     echo -e "${BOLD}    --scan           Subdomains/gau(website history)/pars{NC}"
     echo -e "${BOLD}    --exploit           Subenum + alive + params + vuln${NC}"
     echo -e "$RED${BOLD}    --custom           Custom exploit modules ${NC}"
+    echo -e "$magenta${BOLD}    --xss           xss scan only(dalfox)${NC}"
+    echo -e "$magenta${BOLD}    --lfi           LFI scan with LFIscanner${NC}"
+    echo -e "$magenta${BOLD}    --ssti           SSTI scan with TPLmap${NC}"
+    echo -e "$magenta${BOLD}    --csrf           CSRF (crlfuzz)${NC}"
     exit 0
 }
 
@@ -111,7 +115,7 @@ vuln2() {
 }
 
 vuln3() {
-	echo -e "$RED${BOLD} --- $green${BOLD}Custom Exploit Scan $RED${BOLD}--- ${NC} \n"
+	echo -e "$RED${BOLD} --- $green${BOLD}Custom Exploitation Scanning $RED${BOLD}--- ${NC} \n"
     echo -e "$yellow${BOLD} \n [!] SSTI Scan: \n$CYAN"
     for url in $(cat output/$domain/gxss_dump.txt); do python3.9 tools/tplmap/tplmap.py -u $url; anew output/$domain/VULN_ssti; done
     [ -s output/$domain/VULN_ssti.txt ] && echo -e "$green${BOLD} [+] FOUND VULN SSTI [+] Check output/$domain/VULN_ssti.txt for output ${NC}" || echo -e "$RED [+] No SSTI Found[+] ${NC}"
@@ -120,7 +124,7 @@ vuln3() {
 
     #for url in $(cat output/$domain/ssti.txt); do python3.9 tools/tplmap/tplmap.py -u $url; print $url; done #if error make sure to not use python 3.11 or above #another fix for tplmap: https://github.com/epinna/tplmap/issues/118
     echo -e "$green${BOLD} \n [!] XSS Scan: \n${NC}"
-    #cat output/$domain/gxss_dump.txt | dalfox pipe | anew output/$domain/VULN_xss.txt
+    cat output/$domain/gxss_dump.txt | dalfox pipe | anew output/$domain/VULN_xss.txt
     [ -s output/$domain/VULN_xss.txt ] && echo -e "$yellow${BOLD} [+] FOUND VULN XSS [+] Check output/$domain/VULN_xss.txt for output ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
     echo -e "$CYAN${BOLD} \n [!] CSRF Scan: \n${NC}"
     crlfuzz -l output/$domain/subs_alive.txt -o output/$domain/VULN_csrf.txt
@@ -130,13 +134,40 @@ vuln3() {
     cat output/$domain/redirect.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host $green${BOLD} Open Redir. Vulnerable\n" ;done
     cat output/$domain/sqli.txt | parallel -j 50 'ghauri -u '{}' --dbs --hostname --confirm --batch' | anew output/$domain/VULN_sqli.txt
 }
+xss() {
+    echo -e "$green${BOLD} \n [!] XSS Scan: \n${NC}"
+    cat output/$domain/gxss_dump.txt | dalfox pipe | anew output/$domain/VULN_xss.txt
+    [ -s output/$domain/VULN_xss.txt ] && echo -e "$yellow${BOLD} [+] FOUND VULN XSS [+] Check output/$domain/VULN_xss.txt for output ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
+}
+ssti() {
+    echo -e "$yellow${BOLD} \n [!] SSTI Scan: \n$CYAN"
+    for url in $(cat output/$domain/gxss_dump.txt); do python3.9 tools/tplmap/tplmap.py -u $url; anew output/$domain/VULN_ssti; done
+    [ -s output/$domain/VULN_ssti.txt ] && echo -e "$green${BOLD} [+] FOUND VULN SSTI [+] Check output/$domain/VULN_ssti.txt for output ${NC}" || echo -e "$RED [+] No SSTI Found[+] ${NC}"
 
+}
+lfi() {
+    echo -e "$CYAN${BOLD} \n [!] LFI Scan: \n$yellow" # check the LFIscanner dir for an output / should edit the LFIscanner.py and have it output the "VULN" to a file 
+    for url in $(cat output/$domain/lfi_qsr.txt); do python3 tools/LFIscanner/LFIscanner.py -t $url -p tools/LFIscanner/payloads.txt; print $url; anew output/$domain/VULN_lfi; done
+}
+csrf() {
+    echo -e "$CYAN${BOLD} \n [!] CSRF Scan: \n${NC}"
+    crlfuzz -l output/$domain/subs_alive.txt -o output/$domain/VULN_csrf.txt
+    [ -s output/$domain/VULN_csrf.txt ] && echo -e "$green${BOLD} [+] FOUND VULN CSRF [+] Check output/$domain/VULN_csrf.txt for output ${NC}" || echo -e "$RED [+] No CSRF Found[+] ${NC}"
+}
 if [ "$1" == "--scan" ]; then
     vuln1
 elif [ "$1" == "--exploit" ]; then
     vuln2
 elif [ "$1" == "--custom" ]; then
     vuln3
+elif [ "$1" == "--xss" ]; then
+    xss
+elif [ "$1" == "--ssti" ]; then
+    ssti
+elif [ "$1" == "--lfi" ]; then
+    lfi
+elif [ "$1" == "--csrf" ]; then
+    csrf
 else
     echo -e "${RED}Unknown option: $1 ${NC}"
     help
