@@ -95,5 +95,16 @@ git clone https://github.com/projectdiscovery/httpx.git
 cd httpx/cmd/httpx
 go build
 mv httpx /bin/
-cd ~/downloads/
-echo "${cyan}Done${reset}"
+cd ~/eye
+cd tools
+git clone https://github.com/R3LI4NT/LFIscanner.git
+cd LFIscanner
+pip3 install -r requirements.txt
+cd ..
+####### TPLMap (ssti)
+git clone https://github.com/epinna/tplmap.git
+cd tplmap
+pip3 install -r requirements.txt
+cd ..
+cd .. ## in ~/eye/
+echo "${green}ALL SET."${reset}"
