@@ -1,3 +1,6 @@
+
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/main_eye.png?raw=true)
+
 ### Quick install
 chmod x+ * 
 Then run the setup.sh
