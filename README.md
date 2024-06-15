@@ -46,6 +46,8 @@ gf ( https://github.com/tomnomnom/gf ) #with the templates ( https://github.com/
 
 Gxss ( https://github.com/KathanP19/Gxss ) 
 
+trashcompator ( https://github.com/michael1026/trashcompactor )
+
 dalfox ( https://github.com/hahwul/dalfox ) 
 
 xray ( https://github.com/chaitin/xray )
