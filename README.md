@@ -39,11 +39,6 @@ Use:
 
 ![screenshot](https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(23).png?raw=true)
 
-## Tools
-
-Inside tools is xray : https://github.com/evilsocket/xray 
-
-along with the configs feel free to delete and install in the directory yourself
 
 ### Programs To Install
 
