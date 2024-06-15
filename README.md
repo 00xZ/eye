@@ -74,4 +74,10 @@ httpx ( https://github.com/projectdiscovery/httpx )
 parallel ( https://github.com/parallel-finance/parallel )
 
 gdn ( https://github.com/kmskrishna/gdn )
+
+### Lastest update
+
+LFIscanner ( https://github.com/R3LI4NT/LFIscanner )
+
+TPLmap ( https://github.com/epinna/tplmap )
  
