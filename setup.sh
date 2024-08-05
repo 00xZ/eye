@@ -22,6 +22,8 @@ ${green} gf
  paramspider
  nuclei
  xray
+ uro
+ sqlisniper
                                   "
 echo "${green}Your best bet is to install these by hand for now, besides xray which if you do put it into the tools/ dir${reset}"
 chmod +x eye.sh
@@ -211,4 +213,19 @@ cd tplmap
 pip3 install -r requirements.txt
 cd ..
 cd .. ## in ~/eye/
+####### uro (delcuter gau)
+cd tools
+git clone https://github.com/s0md3v/uro.git
+cd uro
+python3 setup.py install
+cd ..
+cd ..
+# in ~/eye/
+###### Blind SQL Injection
+cd tools
+git clone https://github.com/danialhalo/SqliSniper.git
+cd SqliSniper
+python3 -m pip install -r requirements.txt
+cd ..
+### in eye/tools
 echo "${green}ALL SET."${reset}"
