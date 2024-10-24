@@ -22,15 +22,18 @@ echo -e "$magenta Scan/Exploit - by @$green${BOLD}00xZ$NC /$green${BOLD} Eyezik 
 echo " "
 help() {
     echo -e "$CYAN${BOLD}Usage:${NC}"
-    echo -e "${BOLD}    --help            Shows the help menu${NC}"
-    echo -e "${BOLD}    --scan           Subdomains/gau(website history)/pars{NC}"
+    echo -e "    --help            Shows the help menu${NC}"
+    echo -e "    --scan           Subdomains/gau or waymore/pars{NC}"
+    echo -e "$green${BOLD}    --lscan           Subdomains/gau/pars{NC}"
+    #echo -e "$green${BOLD}    --odd-scan           FFuF Sub domains then direcotries{NC}"
+    echo -e "$green${BOLD}    --ts           FFuF Sub domains then direcotries{NC}"
     echo -e "${BOLD}    --exploit           Subenum + alive + params + vuln${NC}"
-    echo -e "$RED${BOLD}    --custom           Custom exploit modules ${NC}"
-    echo -e "$magenta${BOLD}    --xss           xss scan only(dalfox)${NC}"
-    echo -e "$magenta${BOLD}    --lfi           LFI scan with LFIscanner${NC}"
-    echo -e "$magenta${BOLD}    --ssti           SSTI scan with TPLmap${NC}"
-    echo -e "$magenta${BOLD}    --csrf           CSRF (crlfuzz)${NC}"
-    echo -e "$magenta${BOLD}    --sqli           Sql Injection${NC}"
+    echo -e "$RED    --custom           Custom exploit modules ${NC}"
+    echo -e "$magenta    --xss           xss scan only(dalfox)${NC}"
+    echo -e "$magenta    --lfi           LFI scan with LFIscanner${NC}"
+    echo -e "$magenta    --ssti           SSTI scan with TPLmap${NC}"
+    echo -e "$magenta    --csrf           CSRF (crlfuzz)${NC}"
+    echo -e "$magenta    --sqli           Sql Injection${NC}"
     exit 0
 }
 
@@ -142,6 +145,112 @@ vuln3() {
     cat output/$domain/redirect.txt | grep -a -i \=http | qsreplace 'http://evil.com' | while read host do;do curl -s -L $host -I| grep "http://evil.com" && echo -e "$host $green${BOLD} Open Redir. Vulnerable\n" ;done
     cat output/$domain/sqli.txt | parallel -j 50 'ghauri -u '{}' --dbs --hostname --confirm --batch' | anew output/$domain/VULN_sqli.txt
 }
+lscan() {
+    if [[ ${domain:0:5} == "https" ]]; then
+            domain=${domain:8:${#domain}-8}
+    elif [[ ${domain:0:4} == "http" ]]; then
+            domain=${domain:7:${domain}-7}
+    fi
+    if [ -d output/$domain ]; then
+        echo -e "$RED${BOLD} [!] An output folder with the same domain name already exists."
+        echo -e "$yellow Delete folder:[ $green y $yellow / $RED n $yellow ]: "
+        read -p " " delete
+        if [[ $delete == 'y' ]]; then
+                rm -rf output/$domain
+        else
+                exit 2
+        fi
+    fi
+    mkdir -p output/$domain/
+    echo -e "$magenta Output: output/$domain/raw_urls.txt)"
+    echo -e "\n"
+    trap : SIGINT
+    echo -e "$green [+]$CYAN Get All Urls "
+    gau $domain > output/$domain/raw_urls.txt
+    echo -e "$green [+]$RED Sub Finder "
+    subfinder -d $domain -silent -all | anew output/$domain/subs.txt
+    echo -e "$green [+]$yellow Sub Life Check "
+    cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
+    cat output/$domain/raw_urls.txt | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew output/$domain/js.txt
+
+
+    echo $2
+    echo -e "$CYAN${BOLD} [+] Parsing With GF ${NC}" #GF is a grep wrapper using a set of paramiters to check for whats most likely to match the given exploit
+    cat output/$domain/raw_urls.txt | uro > output/$domain/raw_tmp.txt 
+    rm output/$domain/raw_urls.txt
+    mv output/$domain/raw_tmp.txt output/$domain/raw_urls.txt ## yeah i could have done it better, but it works.
+    cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
+    cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
+    cat output/$domain/lfi.txt | qsreplace | anew output/$domain/lfi_qsr.txt
+    cat output/$domain/raw_urls.txt | gf sqli |uro | gxss |anew output/$domain/sqli.txt
+    cat output/$domain/raw_urls.txt | gf ssti > output/$domain/ssti.txt
+    cat output/$domain/raw_urls.txt | gf ssrf > output/$domain/ssrf.txt
+    cat output/$domain/raw_urls.txt | gf idor > output/$domain/idor.txt
+    cat output/$domain/raw_urls.txt | gf xss | sort | uniq > output/$domain/xss.txt
+    echo -e "$green [+]$magenta Compacting... "
+    cat output/$domain/xss.txt | trashcompactor | anew output/$domain/reflected_alive.txt #FIX
+    cat output/$domain/xss.txt | gxss -c 100 | anew output/$domain/gxss_dump.txt
+    echo -e "$yellow [+]$green Finding Hidden Files "
+    cat output/$domain/raw_urls.txt | grep -color -E ".xls | \\. xml | \\.xlsx | \\.json | \\. pdf | \\.sql | \\. doc| \\.docx | \\. pptx| \\.txt| \\.zip| \\.tar.gz| \\.tgz| \\.bak| \\.7z| \\.rar" | anew output/$domain/hidden_files.txt
+    cat output/$domain/subs.txt| httpx -silent | anew output/$domain/subs_alive.txt #dirsearch makes you use the full path dir /root/eye/output/... instead of output/....
+    echo -e "$yellow [+]$CYAN${BOLD} [!] Crawling Subdomains [!] "
+    katana -list output/$domain/subs_alive.txt | anew output/$domain/Spidered_subs.txt
+    cat output/$domain/Spidered_subs.txt | gf xss | anew output/$domain/xss.txt
+}
+of() {
+    if [[ ${domain:0:5} == "https" ]]; then
+            domain=${domain:8:${#domain}-8}
+    elif [[ ${domain:0:4} == "http" ]]; then
+            domain=${domain:7:${domain}-7}
+    fi
+    if [ -d output/$domain ]; then
+        echo -e "$RED${BOLD} [!] An output folder with the same domain name already exists."
+        echo -e "$yellow Delete folder:[ $green y $yellow / $RED n $yellow ]: "
+        read -p " " delete
+        if [[ $delete == 'y' ]]; then
+                rm -rf output/$domain
+        else
+                exit 2
+        fi
+    fi
+    mkdir -p output/$domain/
+    echo -e "$magenta Output: output/$domain/raw_urls.txt)"
+    echo -e "\n"
+    trap : SIGINT
+    echo -e "$green [+]$CYAN Get All Urls "
+    gau $domain > output/$domain/raw_urls.txt
+    echo -e "$green [+]$RED Sub Finder "
+    subfinder -d $domain -silent -all | anew output/$domain/subs.txt
+    echo -e "$green [+]$yellow Sub Life Check "
+    cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
+    cat output/$domain/raw_urls.txt | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew output/$domain/js.txt
+    #echo -e "$green [+]$yellow Fuzzing Subdomains"
+    #ffuf -w fuzzing/subdomains.txt -u http://$domain/ -H “Host: FUZZ.$domain.com” -lf 1 -of
+
+
+    echo $2
+    echo -e "$CYAN${BOLD} [+] Parsing With GF ${NC}" #GF is a grep wrapper using a set of paramiters to check for whats most likely to match the given exploit
+    cat output/$domain/raw_urls.txt | uro > output/$domain/raw_tmp.txt 
+    rm output/$domain/raw_urls.txt
+    mv output/$domain/raw_tmp.txt output/$domain/raw_urls.txt ## yeah i could have done it better, but it works.
+    cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
+    cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
+    cat output/$domain/lfi.txt | qsreplace | anew output/$domain/lfi_qsr.txt
+    cat output/$domain/raw_urls.txt | gf sqli |uro | gxss |anew output/$domain/sqli.txt
+    cat output/$domain/raw_urls.txt | gf ssti > output/$domain/ssti.txt
+    cat output/$domain/raw_urls.txt | gf ssrf > output/$domain/ssrf.txt
+    cat output/$domain/raw_urls.txt | gf idor > output/$domain/idor.txt
+    cat output/$domain/raw_urls.txt | gf xss | sort | uniq > output/$domain/xss.txt
+    echo -e "$green [+]$magenta Compacting... "
+    cat output/$domain/xss.txt | trashcompactor | anew output/$domain/reflected_alive.txt #FIX
+    cat output/$domain/xss.txt | gxss -c 100 | anew output/$domain/gxss_dump.txt
+    echo -e "$yellow [+]$green Finding Hidden Files "
+    cat output/$domain/raw_urls.txt | grep -color -E ".xls | \\. xml | \\.xlsx | \\.json | \\. pdf | \\.sql | \\. doc| \\.docx | \\. pptx| \\.txt| \\.zip| \\.tar.gz| \\.tgz| \\.bak| \\.7z| \\.rar" | anew output/$domain/hidden_files.txt
+    cat output/$domain/subs.txt| httpx -silent | anew output/$domain/subs_alive.txt #dirsearch makes you use the full path dir /root/eye/output/... instead of output/....
+    echo -e "$yellow [+]$CYAN${BOLD} [!] Crawling Subdomains [!] "
+    katana -list output/$domain/subs_alive.txt | anew output/$domain/Spidered_subs.txt
+    cat output/$domain/Spidered_subs.txt | gf xss | anew output/$domain/xss.txt
+}
 xss() {
     echo -e "$green${BOLD} \n [!] XSS Scan: \n${NC}"
     cat output/$domain/gxss_dump.txt | dalfox pipe | anew output/$domain/VULN_xss.txt
@@ -152,6 +261,63 @@ ssti() {
     for url in $(cat output/$domain/gxss_dump.txt); do python3.9 tools/tplmap/tplmap.py -u $url; anew output/$domain/VULN_ssti; done
     [ -s output/$domain/VULN_ssti.txt ] && echo -e "$green${BOLD} [+] FOUND VULN SSTI [+] Check output/$domain/VULN_ssti.txt for output ${NC}" || echo -e "$RED [+] No SSTI Found[+] ${NC}"
 
+}
+keys(){
+        echo -e "$CYAN${BOLD} [!]$green Dumping API Keys $CYAN[!] ${NC}"
+        cat output/$domain/js.txt | mantra | anew output/$domain/api_keys.txt
+        main_loop
+
+}
+touchy_scan() {
+    if [[ ${domain:0:5} == "https" ]]; then
+            domain=${domain:8:${#domain}-8}
+    elif [[ ${domain:0:4} == "http" ]]; then
+            domain=${domain:7:${domain}-7}
+    fi
+    if [ -d output/$domain ]; then
+        echo -e "$RED${BOLD} [!] An output folder with the same domain name already exists."
+        echo -e "$yellow Delete folder:[ $green y $yellow / $RED n $yellow ]: "
+        read -p " " delete
+        if [[ $delete == 'y' ]]; then
+                rm -rf output/$domain
+        else
+                exit 2
+        fi
+    fi
+    mkdir -p output/$domain/
+    echo -e "$CYAN${BOLD} [+] FUZZING ${NC}" 
+    echo -e "$magenta Output: output/$domain/raw_urls.txt)"
+    echo -e "\n"
+    trap : SIGINT
+    
+    echo -e "$green [+]$yellow Fuzzing Subdomains"
+    ffuf -rate 25 -w fuzzing/sub5k -u https://$domain/ -H "Host: FUZZ.$domain.com" -fl 1 -of output/$domain/subs_fuzzed.txt
+    for urlfuzz in $(cat output/$domain/subs_fuzzed.txt); do ffuf -rate 25 -w fuzzing/dirsmall -u https://$urlfuzz/FUZZ -lf 1 -of output/$domain/raw_urls.txt; print $urlfuzz; anew output/$domain/raw_urls_debug; done
+    #ffuf -w fuzzing/dir_list.list -u https://$domain/FUZZ -fl 1 -of output/$domain/subs_fuzzed.txt
+
+
+    echo $2
+    echo -e "$CYAN${BOLD} [+] Parsing With GF ${NC}" #GF is a grep wrapper using a set of paramiters to check for whats most likely to match the given exploit
+    cat output/$domain/raw_urls.txt | uro > output/$domain/raw_tmp.txt 
+    rm output/$domain/raw_urls.txt
+    mv output/$domain/raw_tmp.txt output/$domain/raw_urls.txt ## yeah i could have done it better, but it works.
+    cat output/$domain/raw_urls.txt | gf redirect > output/$domain/redirect.txt
+    cat output/$domain/raw_urls.txt | gf lfi > output/$domain/lfi.txt
+    cat output/$domain/lfi.txt | qsreplace | anew output/$domain/lfi_qsr.txt
+    cat output/$domain/raw_urls.txt | gf sqli |uro | gxss |anew output/$domain/sqli.txt
+    cat output/$domain/raw_urls.txt | gf ssti > output/$domain/ssti.txt
+    cat output/$domain/raw_urls.txt | gf ssrf > output/$domain/ssrf.txt
+    cat output/$domain/raw_urls.txt | gf idor > output/$domain/idor.txt
+    cat output/$domain/raw_urls.txt | gf xss | sort | uniq > output/$domain/xss.txt
+    echo -e "$green [+]$magenta Getting JavaScripts "
+    cat output/$domain/raw_urls.txt | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew output/$domain/js.txt
+    echo -e "$green [+]$magenta Compacting... "
+    cat output/$domain/xss.txt | trashcompactor | anew output/$domain/reflected_alive.txt #FIX
+    cat output/$domain/xss.txt | gxss -c 100 | anew output/$domain/gxss_dump.txt
+    echo -e "$yellow [+]$green Finding Hidden Files "
+    cat output/$domain/raw_urls.txt | grep -color -E ".xls | \\. xml | \\.xlsx | \\.json | \\. pdf | \\.sql | \\. doc| \\.docx | \\. pptx| \\.txt| \\.zip| \\.tar.gz| \\.tgz| \\.bak| \\.7z| \\.rar" | anew output/$domain/hidden_files.txt
+    cat output/$domain/subs.txt| httpx -silent | anew output/$domain/subs_alive.txt #dirsearch makes you use the full path dir /root/eye/output/... instead of output/....
+    cat output/$domain/Spidered_subs.txt | gf xss | anew output/$domain/xss.txt
 }
 lfi() {
     echo -e "$CYAN${BOLD} \n [!] LFI Scan: \n$yellow" # check the LFIscanner dir for an output / should edit the LFIscanner.py and have it output the "VULN" to a file
@@ -187,6 +353,12 @@ if [ "$1" == "--scan" ]; then
     vuln1
 elif [ "$1" == "--exploit" ]; then
     vuln2
+elif [ "$1" == "--lscan" ]; then
+    lscan
+elif [ "$1" == "--odd-scan" ]; then
+    of
+elif [ "$1" == "--ts" ]; then
+    touchy_scan
 elif [ "$1" == "--xss" ]; then
     xss
 elif [ "$1" == "--ssti" ]; then
