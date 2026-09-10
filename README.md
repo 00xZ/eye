@@ -4,7 +4,7 @@ _All-in-one recon & low-hanging-fruit automation tool for bug hunters and web se
 ---
 
 ## 📸 Main Interface
-![screenshot](https://github.com/00xZ/eye/blob/main/tools/main_eye.png?raw=true)
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/scan_help.PNG?raw=true)
 
 ---
 
