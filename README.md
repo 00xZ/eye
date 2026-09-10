@@ -46,7 +46,7 @@ output/NameOfTheSiteYouScanned.com/
 ./eye.sh --scan thewebsite.com
 ```
 
-![screenshot](https://github.com/00xZ/eye/blob/main/tools/scanning.PMG?raw=true)
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/scanning.PNG?raw=true)
 
 ---
 
