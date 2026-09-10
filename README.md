@@ -57,12 +57,12 @@ output/NameOfTheSiteYouScanned.com/
 
 ---
 
-### 🧩 Custom Exploit Mode
+### 🧩 Nuclei Mode
 ```bash
-./eye.sh --custom thewebsite.com
+./eye.sh --nuke thewebsite.com
 ```
 
-![screenshot](https://github.com/00xZ/eye/blob/main/toolsCustom.PPNG?raw=true)
+![screenshot](https://github.com/00xZ/eye/blob/main/toolsCustom.PNG?raw=true)
 
 ---
 
