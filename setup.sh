@@ -1,231 +1,298 @@
-#!/bin/bash
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-cyan=`tput setaf 6`
-reset=`tput sgr0`
-echo "${green}The Eye setup${reset}"
-echo "${cyab}Programs to Install:${reset}
-${green} gf
- gxss
- dalfox
- ffuf
- OpenRedireX
- qsreplace
- parallel
- ghauri
- anew
- subfinder
- waymore
- httpx
- dirsearch
- paramspider
- nuclei
- xray
- uro
- sqlisniper
-                                  "
-echo "${green}Your best bet is to install these by hand for now, besides xray which if you do put it into the tools/ dir${reset}"
-chmod +x eye.sh
-if [ ! -d output ]; then
-	mkdir output
-fi
-
-
-########## GAU
-
-
-
-apt update
-apt upgrade
-apt install libc6
-cd ~/downloads/
-git clone https://github.com/tomnomnom/gf.git
-cd gf
-go mod init github.com/tomnomnom/gf
-go mod tidy
-go build
-cp gf /bin/
-git clone https://github.com/1ndianl33t/Gf-Patterns.git
-rm *.md
-cd ~/
-mkdir .gf
-cd .gf
-mv ~/downloads/Gf-Patterns/*.json ~/.gf/
-cd ~/downloads
-wget https://github.com/projectdiscovery/httpx/releases/download/v1.6.2/httpx_1.6.2_linux_amd64.zip
-rm *.md
-unzip httpx_1.6.2_linux_amd64.zip
-mv httpx /bin/
-wget https://github.com/projectdiscovery/nuclei/releases/download/v3.2.8/nuclei_3.2.8_linux_amd64.zip
-rm *.md
-unzip nuclei_3.2.8_linux_amd64.zip
-mv nuclei /bin/
-cd ~/
-git clone https://github.com/projectdiscovery/nuclei-templates.git
-rm *.md
-cd ~/downloads/
-git clone https://github.com/projectdiscovery/katana.git
-cd katana/cmd
-go build
-mv katana /bin/
-wget https://github.com/projectdiscovery/naabu/releases/download/v2.3.1/naabu_2.3.1_linux_amd64.zip
-unzip naabu_2.3.1_linux_amd64.zip
-rm *.md
-mv naabu /bin/
-wget https://github.com/tomnomnom/anew/releases/download/v0.1.1/anew-linux-amd64-0.1.1.tgz
-tar -xvzf anew-linux-amd64-0.1.1.tgz
-mv anew /bin/
-wget https://github.com/KathanP19/Gxss/releases/download/v4.1/Gxss_4.1_Linux_x86_64.tar.gz
-tar -xvzf Gxss_4.1_Linux_x86_64.tar.gz
-cp Gxss /bin/
-###git clone https://github.com/maurosoria/dirsearch.git --depth 1
-pip3 install dirsearch
-git clone https://github.com/devanshbatham/paramspider
-cd paramspider
-pip install .
-cd ..
-git clone https://github.com/michael1026/trashcompactor.git
-cd trashcompactor
-go build
-mv trashcompactor /bin/
-cd ..
-wget https://github.com/projectdiscovery/subfinder/releases/download/v2.6.6/subfinder_2.6.6_linux_amd64.zip
-unzip subfinder_2.6.6_linux_amd64.zip
-mv subfinder /bin/
-git clone https://github.com/projectdiscovery/httpx.git
-cd httpx/cmd/httpx
-go build
-mv httpx /bin/
-cd ~/eye
-########## ffuf
-
-
-
-echo "${cyan}Installing ffuf... ${reset}"
-cd tools
-git clone https://github.com/ffuf/ffuf.git
-echo -e "Building the main.go file.\n${yellow}[Warning] This process fails if you don't have go installed. If you have any error messages below, try again after installing go.${reset}"
-cd ffuf
-go build main.go help.go
-chmod +x main
-cd ../..
-
-
-
-########## OpenRedireX
-
-
-
-
-echo "${cyan}Installing OpenRedireX... ${reset}"
-cd tools 
-git clone https://github.com/devanshbatham/OpenRedireX.git
-cd ..
-echo -e "openredirex(){
-	cat $1 | python3 tools/OpenRedireX/openredirex.py -p \$2
-}" >> .profile
-echo -e "${green}Done${reset}\n"
-
-
-
-
-########## qsreplace
-
-
-
-
-
-echo "${cyan}Installing qsreplace...${reset}"
-cd tools
-git clone https://github.com/tomnomnom/qsreplace
-echo -e "Building the main.go file.\n${yellow}[Warning] This process fails if you don't have go installed. If you have any error messages below, try again after installing go.${reset}"
-cd qsreplace
-go build main.go
-cd ../..
-
-cp tools/qsreplace/main /bin/qsreplace
-
-
-
-
-########## Gxss
-
-
-
-
-git clone https://github.com/KathanP19/Gxss
-cd Gxss
-echo "${green}Installing Gxss${reset}"
-go build
-cp tools/Gxss /bin/Gxss
-echo "${cyan}Gxss Installed ${reset}"
-cd ..
-
-########## Dalfox
-
-
-git clone https://github.com/hahwul/dalfox
-cd dalfox
-go build
-echo "${green}Installing DalFox${reset}"
-cp dalfox /bin/dalfox
-cd ..
-echo "${cyan}Installed DalFox${reset}"
-
-########## waymore
-
-
-python3 -m pip install waymore
-
-########## ghauri
-cd tools
-git clone https://github.com/r0oth3x49/ghauri.git
-cd ghauri
-python3 -m pip install --upgrade -r requirements.txt
-python3 setup.py install
-cd ..
-############### Xray
-wget https://github.com/chaitin/xray/releases/download/1.9.11/xray_linux_amd64.zip
-unzip xray_linux_amd64.zip
-echo "xray installed"
-
-########## gf and its patterns
-git clone https://github.com/tomnomnom/gf.git
-cd gf
-go build
-cp gf /bin/
-cd ..
-mkdir ~/.gf
-git clone https://github.com/1ndianl33t/Gf-Patterns.git
-cp Gf-Patterns/*.json ~/.gf/
-echo "${red} "
-gf -list
-######### LFIscanner
-cd tools
-git clone https://github.com/R3LI4NT/LFIscanner.git
-cd LFIscanner
-pip3 install -r requirements.txt
-cd ..
-####### TPLMap (ssti)
-git clone https://github.com/epinna/tplmap.git
-cd tplmap
-pip3 install -r requirements.txt
-cd ..
-cd .. ## in ~/eye/
-####### uro (delcuter gau)
-cd tools
-git clone https://github.com/s0md3v/uro.git
-cd uro
-python3 setup.py install
-cd ..
-cd ..
-# in ~/eye/
-###### Blind SQL Injection
-cd tools
-git clone https://github.com/danialhalo/SqliSniper.git
-cd SqliSniper
-python3 -m pip install -r requirements.txt
-cd ..
-### in eye/tools
-echo "${green}ALL SET."${reset}"
+set -uo pipefail
+ 
+## ---------------------------------------------------------------------
+## colors / banner
+## ---------------------------------------------------------------------
+RED=$(tput setaf 1)
+WHITE=$(tput setaf 7)
+BOLD=$(tput bold)
+DIM=$(tput dim)
+RESET=$(tput sgr0)
+ 
+log_step()    { echo -e "${RED}${BOLD}[*]${RESET} ${WHITE}$1${RESET}"; }
+log_info()    { echo -e "${WHITE}    $1${RESET}"; }
+log_success() { echo -e "${RED}${BOLD}[+]${RESET} ${WHITE}$1${RESET}"; }
+log_warn()    { echo -e "${RED}${BOLD}[!]${RESET} ${WHITE}$1${RESET}"; }
+log_fail()    { echo -e "${RED}${BOLD}[x]${RESET} ${WHITE}$1${RESET}"; }
+ 
+banner() {
+cat << "EOF"
+${RED}${BOLD} -                                               -
+ ░▒▓████████▓▒░       ░▒▓███████▓▒░▒▓█▓▒░░▒▓█▓▒░
+        ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
+      ░▒▓██▓▒░       ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
+    ░▒▓██▓▒░          ░▒▓██████▓▒░░▒▓████████▓▒░
+  ░▒▓██▓▒░                  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+ ░▒▓█▓▒░      ░▒▓██▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+ ░▒▓████████▓▒░▒▓██▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░
+ -                                              -${RESET}
+EOF
+echo -e "${WHITE}${BOLD}The Eye setup${RESET}\n"
+}
+ 
+## ---------------------------------------------------------------------
+## paths
+## ---------------------------------------------------------------------
+BASE_DIR="$HOME/eye"
+TOOLS_DIR="$BASE_DIR/tools"
+DL_DIR="$BASE_DIR/.downloads"
+BIN_DIR="/usr/local/bin"
+ 
+if [ "$EUID" -ne 0 ]; then SUDO="sudo"; else SUDO=""; fi
+ 
+mkdir -p "$BASE_DIR" "$TOOLS_DIR" "$DL_DIR" "$BASE_DIR/output"
+[ -f "$BASE_DIR/eye.sh" ] && chmod +x "$BASE_DIR/eye.sh"
+[ -f "$BASE_DIR/z.sh" ]   && chmod +x "$BASE_DIR/z.sh"
+ 
+TOOL_LIST=(gf Gxss dalfox ffuf OpenRedireX qsreplace parallel ghauri anew \
+           subfinder waymore httpx dirsearch paramspider nuclei xray uro \
+           SqliSniper katana naabu trashcompactor LFIscanner tplmap)
+ 
+## track results for the final summary
+declare -A RESULT
+ 
+run_step() {
+    # run_step "name" function_name
+    local name="$1" fn="$2"
+    if "$fn" >/tmp/eye_setup_"$name".log 2>&1; then
+        RESULT["$name"]="ok"
+        log_success "$name installed"
+    else
+        RESULT["$name"]="fail"
+        log_fail "$name failed — see /tmp/eye_setup_${name}.log"
+    fi
+}
+ 
+clone_or_pull() {
+    # clone_or_pull <repo_url> <dest_dir>
+    local repo="$1" dest="$2"
+    if [ -d "$dest/.git" ]; then
+        git -C "$dest" pull -q
+    else
+        git clone -q "$repo" "$dest"
+    fi
+}
+ 
+fetch_zip_release() {
+    # fetch_zip_release <url> <zip_name>
+    local url="$1" zip="$2"
+    wget -q -O "$DL_DIR/$zip" "$url"
+    unzip -oq "$DL_DIR/$zip" -d "$DL_DIR/${zip%.zip}"
+}
+ 
+## ---------------------------------------------------------------------
+## base system deps
+## ---------------------------------------------------------------------
+setup_base() {
+    log_step "Updating system + installing base dependencies"
+    $SUDO apt update -y
+    $SUDO apt upgrade -y
+    $SUDO apt install -y libc6 git curl wget unzip tar build-essential \
+        python3 python3-pip python3-venv golang-go jq
+}
+ 
+## ---------------------------------------------------------------------
+## individual tool installers (each is idempotent)
+## ---------------------------------------------------------------------
+install_gf() {
+    clone_or_pull https://github.com/tomnomnom/gf.git "$TOOLS_DIR/gf"
+    (cd "$TOOLS_DIR/gf" && go mod init github.com/tomnomnom/gf 2>/dev/null; go mod tidy && go build -o gf) || return 1
+    $SUDO mv "$TOOLS_DIR/gf/gf" "$BIN_DIR/gf"
+    mkdir -p "$HOME/.gf"
+    clone_or_pull https://github.com/1ndianl33t/Gf-Patterns.git "$TOOLS_DIR/Gf-Patterns"
+    cp "$TOOLS_DIR"/Gf-Patterns/*.json "$HOME/.gf/"
+}
+ 
+install_httpx() {
+    clone_or_pull https://github.com/projectdiscovery/httpx.git "$TOOLS_DIR/httpx"
+    (cd "$TOOLS_DIR/httpx/cmd/httpx" && go build -o httpx) || return 1
+    $SUDO mv "$TOOLS_DIR/httpx/cmd/httpx/httpx" "$BIN_DIR/httpx"
+}
+ 
+install_nuclei() {
+    clone_or_pull https://github.com/projectdiscovery/nuclei.git "$TOOLS_DIR/nuclei"
+    (cd "$TOOLS_DIR/nuclei/cmd/nuclei" && go build -o nuclei) || return 1
+    $SUDO mv "$TOOLS_DIR/nuclei/cmd/nuclei/nuclei" "$BIN_DIR/nuclei"
+    clone_or_pull https://github.com/projectdiscovery/nuclei-templates.git "$HOME/nuclei-templates"
+}
+ 
+install_katana() {
+    clone_or_pull https://github.com/projectdiscovery/katana.git "$TOOLS_DIR/katana"
+    (cd "$TOOLS_DIR/katana/cmd/katana" && go build -o katana) || return 1
+    $SUDO mv "$TOOLS_DIR/katana/cmd/katana/katana" "$BIN_DIR/katana"
+}
+ 
+install_naabu() {
+    fetch_zip_release \
+        https://github.com/projectdiscovery/naabu/releases/download/v2.3.1/naabu_2.3.1_linux_amd64.zip \
+        naabu.zip
+    $SUDO mv "$DL_DIR/naabu/naabu" "$BIN_DIR/naabu"
+}
+ 
+install_anew() {
+    wget -q -O "$DL_DIR/anew.tgz" \
+        https://github.com/tomnomnom/anew/releases/download/v0.1.1/anew-linux-amd64-0.1.1.tgz
+    tar -xzf "$DL_DIR/anew.tgz" -C "$DL_DIR"
+    $SUDO mv "$DL_DIR/anew" "$BIN_DIR/anew"
+}
+ 
+install_gxss() {
+    clone_or_pull https://github.com/KathanP19/Gxss.git "$TOOLS_DIR/Gxss"
+    (cd "$TOOLS_DIR/Gxss" && go build -o Gxss) || return 1
+    $SUDO mv "$TOOLS_DIR/Gxss/Gxss" "$BIN_DIR/Gxss"
+}
+ 
+install_subfinder() {
+    clone_or_pull https://github.com/projectdiscovery/subfinder.git "$TOOLS_DIR/subfinder"
+    (cd "$TOOLS_DIR/subfinder/v2/cmd/subfinder" && go build -o subfinder) || return 1
+    $SUDO mv "$TOOLS_DIR/subfinder/v2/cmd/subfinder/subfinder" "$BIN_DIR/subfinder"
+}
+ 
+install_dirsearch() {
+    pip3 install --upgrade dirsearch
+}
+ 
+install_paramspider() {
+    clone_or_pull https://github.com/devanshbatham/paramspider.git "$TOOLS_DIR/paramspider"
+    (cd "$TOOLS_DIR/paramspider" && pip3 install .)
+}
+ 
+install_trashcompactor() {
+    clone_or_pull https://github.com/michael1026/trashcompactor.git "$TOOLS_DIR/trashcompactor"
+    (cd "$TOOLS_DIR/trashcompactor" && go build -o trashcompactor) || return 1
+    $SUDO mv "$TOOLS_DIR/trashcompactor/trashcompactor" "$BIN_DIR/trashcompactor"
+}
+ 
+install_ffuf() {
+    clone_or_pull https://github.com/ffuf/ffuf.git "$TOOLS_DIR/ffuf"
+    (cd "$TOOLS_DIR/ffuf" && go build -o ffuf main.go help.go) || return 1
+    $SUDO mv "$TOOLS_DIR/ffuf/ffuf" "$BIN_DIR/ffuf"
+}
+ 
+install_openredirex() {
+    clone_or_pull https://github.com/devanshbatham/OpenRedireX.git "$TOOLS_DIR/OpenRedireX"
+    (cd "$TOOLS_DIR/OpenRedireX" && pip3 install -r requirements.txt 2>/dev/null)
+    local profile_line="openredirex(){ cat \$1 | python3 $TOOLS_DIR/OpenRedireX/openredirex.py -p \$2; }"
+    grep -qxF "$profile_line" "$HOME/.profile" 2>/dev/null || echo "$profile_line" >> "$HOME/.profile"
+}
+ 
+install_qsreplace() {
+    clone_or_pull https://github.com/tomnomnom/qsreplace.git "$TOOLS_DIR/qsreplace"
+    (cd "$TOOLS_DIR/qsreplace" && go build -o qsreplace main.go) || return 1
+    $SUDO mv "$TOOLS_DIR/qsreplace/qsreplace" "$BIN_DIR/qsreplace"
+}
+ 
+install_dalfox() {
+    clone_or_pull https://github.com/hahwul/dalfox.git "$TOOLS_DIR/dalfox"
+    (cd "$TOOLS_DIR/dalfox" && go build -o dalfox) || return 1
+    $SUDO mv "$TOOLS_DIR/dalfox/dalfox" "$BIN_DIR/dalfox"
+}
+ 
+install_waymore() {
+    python3 -m pip install --upgrade waymore
+}
+ 
+install_ghauri() {
+    clone_or_pull https://github.com/r0oth3x49/ghauri.git "$TOOLS_DIR/ghauri"
+    (cd "$TOOLS_DIR/ghauri" && python3 -m pip install --upgrade -r requirements.txt && python3 setup.py install)
+}
+ 
+install_xray() {
+    fetch_zip_release \
+        https://github.com/chaitin/xray/releases/download/1.9.11/xray_linux_amd64.zip \
+        xray.zip
+    mkdir -p "$TOOLS_DIR/xray"
+    cp "$DL_DIR"/xray/* "$TOOLS_DIR/xray/" 2>/dev/null
+    chmod +x "$TOOLS_DIR"/xray/xray* 2>/dev/null
+}
+ 
+install_lfiscanner() {
+    clone_or_pull https://github.com/R3LI4NT/LFIscanner.git "$TOOLS_DIR/LFIscanner"
+    (cd "$TOOLS_DIR/LFIscanner" && pip3 install -r requirements.txt)
+}
+ 
+install_tplmap() {
+    clone_or_pull https://github.com/epinna/tplmap.git "$TOOLS_DIR/tplmap"
+    (cd "$TOOLS_DIR/tplmap" && pip3 install -r requirements.txt)
+}
+ 
+install_uro() {
+    clone_or_pull https://github.com/s0md3v/uro.git "$TOOLS_DIR/uro"
+    (cd "$TOOLS_DIR/uro" && python3 setup.py install)
+}
+ 
+install_sqlisniper() {
+    clone_or_pull https://github.com/danialhalo/SqliSniper.git "$TOOLS_DIR/SqliSniper"
+    (cd "$TOOLS_DIR/SqliSniper" && python3 -m pip install -r requirements.txt)
+}
+ 
+install_parallel() {
+    $SUDO apt install -y parallel
+}
+ 
+## ---------------------------------------------------------------------
+## main
+## ---------------------------------------------------------------------
+main() {
+    banner
+    log_info "Installing into: ${BOLD}${BASE_DIR}${RESET}"
+    log_info "Binaries go to:  ${BOLD}${BIN_DIR}${RESET}"
+    echo
+    log_info "Tools this setup manages:"
+    echo -e "${WHITE}$(printf '    %s\n' "${TOOL_LIST[@]}")${RESET}"
+    echo
+ 
+    run_step "base-deps"      setup_base
+    run_step "gf"             install_gf
+    run_step "httpx"          install_httpx
+    run_step "nuclei"         install_nuclei
+    run_step "katana"         install_katana
+    run_step "naabu"          install_naabu
+    run_step "anew"           install_anew
+    run_step "Gxss"           install_gxss
+    run_step "subfinder"      install_subfinder
+    run_step "dirsearch"      install_dirsearch
+    run_step "paramspider"    install_paramspider
+    run_step "trashcompactor" install_trashcompactor
+    run_step "ffuf"           install_ffuf
+    run_step "OpenRedireX"    install_openredirex
+    run_step "qsreplace"      install_qsreplace
+    run_step "dalfox"         install_dalfox
+    run_step "waymore"        install_waymore
+    run_step "ghauri"         install_ghauri
+    run_step "xray"           install_xray
+    run_step "LFIscanner"     install_lfiscanner
+    run_step "tplmap"         install_tplmap
+    run_step "uro"            install_uro
+    run_step "SqliSniper"     install_sqlisniper
+    run_step "parallel"       install_parallel
+ 
+    echo
+    echo -e "${RED}${BOLD}==================== SUMMARY ====================${RESET}"
+    local ok=0 bad=0
+    for name in "${!RESULT[@]}"; do
+        if [ "${RESULT[$name]}" == "ok" ]; then
+            echo -e "  ${WHITE}${BOLD}[+]${RESET} ${WHITE}${name}${RESET}"
+            ((ok++))
+        else
+            echo -e "  ${RED}${BOLD}[x]${RESET} ${RED}${name}${RESET}"
+            ((bad++))
+        fi
+    done
+    echo -e "${RED}${BOLD}==================================================${RESET}"
+    echo -e "${WHITE}${BOLD}${ok} succeeded, ${bad} failed.${RESET}"
+    if [ "$bad" -gt 0 ]; then
+        log_warn "Check the /tmp/eye_setup_<tool>.log files for anything that failed."
+    fi
+ 
+    if command -v gf >/dev/null 2>&1; then
+        echo
+        log_step "Installed gf patterns:"
+        gf -list
+    fi
+ 
+    echo
+    log_success "ALL SET."
+}
+ 
+main "$@"
