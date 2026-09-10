@@ -1,25 +1,24 @@
 #!/bin/bash
 #eye.sh version 2.4 rebranding ( z.sh )
-## colors
+## colors - unified white/red theme
 BOLD="\e[1m"
-CYAN='\033[0;36m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-black='\033[0;30m'
-green='\033[0;32m'
-yellow='\033[0;33m'
-magenta='\033[0;35m'
+CYAN='\033[1;37m'      # white
+BLUE='\033[1;37m'      # white (bold)
+RED='\033[0;31m'       # red
+black='\033[1;37m'     # white (kept name for compatibility, mapped to white)
+green='\033[1;31m'     # bright red (kept name for compatibility)
+yellow='\033[1;37m'    # white (kept name for compatibility)
+magenta='\033[1;31m'   # bright red (kept name for compatibility)
 NC='\033[0m' # No Color
-echo -e "$RED$BOLD -                                               - ${NC}"
-echo -e "$BLUE$BOLD ░▒▓████████▓▒░       ░▒▓███████▓▒░▒▓█▓▒░░▒▓█▓▒░ "
-echo -e "$BLUE$BOLD        ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ "
-echo -e "$BLUE$BOLD      ░▒▓██▓▒░       ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ "
-echo -e "$BLUE$BOLD    ░▒▓██▓▒░          ░▒▓██████▓▒░░▒▓████████▓▒░ "
-echo -e "$BLUE$BOLD  ░▒▓██▓▒░                  ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ "
-echo -e "$BLUE$BOLD ░▒▓█▓▒░      ░▒▓██▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ "
-echo -e "$BLUE$BOLD ░▒▓████████▓▒░▒▓██▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░ "
-echo -e "$RED$BOLD -                                              - ${NC}"
-echo -e "$magenta Scan/Exploit $RED[$BLUE z.sh $RED]$magenta - by @$green${BOLD}00xZ$NC /$green${BOLD} Eyezik     "
+echo -e "$RED${BOLD} -                                                                  - ${NC}"
+echo -e "$RED${BOLD}███████╗██╗░░░██╗███████╗░██████╗██████╗░██╗░░░░░░█████╗░██╗████████╗${NC}"
+echo -e "$RED${BOLD}██╔════╝╚██╗░██╔╝██╔════╝██╔════╝██╔══██╗██║░░░░░██╔══██╗██║╚══██╔══╝${NC}"
+echo -e "$RED${BOLD}█████╗░░░╚████╔╝░█████╗░░╚█████╗░██████╔╝██║░░░░░██║░░██║██║░░░██║░░░${NC}"
+echo -e "$RED${BOLD}██╔══╝░░░░╚██╔╝░░██╔══╝░░░╚═══██╗██╔═══╝░██║░░░░░██║░░██║██║░░░██║░░░${NC}"
+echo -e "$RED${BOLD}███████╗░░░██║░░░███████╗██████╔╝██║░░░░░███████╗╚█████╔╝██║░░░██║░░░${NC}"
+echo -e "$RED${BOLD}╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░╚═╝░░░░░╚══════╝░╚════╝░╚═╝░░░╚═╝░░░${NC}"
+echo -e "$RED${BOLD} -                                                                  - ${NC}"
+echo -e "$magenta Scan/Exploit $RED[$BLUE z.sh $RED]$magenta - by @$RED${BOLD}00xZ$NC /$RED${BOLD} Eyezik${NC}"
 echo " "
 help() {
     echo -e "$BLUE Run --scan before any $magenta(Its sets up all the dir for future tests)${NC}"
@@ -32,21 +31,21 @@ help() {
     echo -e "$RED${BOLD}    --nuke           Nuclei           $green       |${NC}"
     echo -e "    --or             Open Redirect Vuln Scan $green|${NC}"
     echo -e "    --xss            Scan for XSS $green           |${NC}"
-
+ 
     exit 0
 }
-
+ 
 if [ "$1" == "--help" ]; then
     help
 fi
-
+ 
 domain=$2
-
-
+ 
+ 
 zcan(){ # Make sure installed these gf patterns in ~/.gf/ https://github.com/00xZ/GFpattren
     echo -e "${CYAN}${BOLD}    ~ ${CYAN}[ ${BLUE}Z${CYAN}.${BLUE}S${CYAN}H ${CYAN}] ~ ${NC}"
     echo -e "$BLUE${BOLD} [!] Running Subfinder/GAU to custom GF patterns"
-
+ 
     if [[ ${domain:0:5} == "https" ]]; then
             domain=${domain:8:${#domain}-8}
     elif [[ ${domain:0:4} == "http" ]]; then
@@ -76,16 +75,16 @@ zcan(){ # Make sure installed these gf patterns in ~/.gf/ https://github.com/00x
     echo -e "$green [+]$yellow Getting js/json/jsp "
     #cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
     cat output/$domain/raw_urls.txt | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew output/$domain/js.txt
-
-
+ 
+ 
     echo $2
     echo -e "$CYAN${BOLD} [+] Parsing With $BLUE(Custom)$CYAN GF ${NC}" #GF is a grep wrapper using a set of paramiters to check for whats most likely to match the given exploit
-
+ 
 # Authentication & Secrets (API keys, OAuth tokens, etc.)
 #cat output/$domain/raw_urls.txt | gf api-keys | anew output/$domain/auth_and_keys.txt
-
+ 
 # httpx -sc -td -title -probe -fhr -location -mc 200
-
+ 
 # Vulnerabilities & Exploitable Patterns (RCE, SQLi, XSS, CSRF, IDOR)
 cat output/$domain/raw_urls.txt | gf rce | anew output/$domain/rce_patterns.txt
 cat output/$domain/raw_urls.txt | gf rce-2 | anew output/$domain/rce_patterns.txt
@@ -101,17 +100,17 @@ cat output/$domain/raw_urls.txt | gf csrf-error | anew output/$domain/csrf.txt
 cat output/$domain/raw_urls.txt | gf idor | anew output/$domain/authorization_patterns.txt
 cat output/$domain/raw_urls.txt | gf ssrf | anew output/$domain/ssrf.txt
 cat output/$domain/raw_urls.txt | gf lfi | anew output/$domain/lfi.txt
-
+ 
     echo -e "$yellow [+]$green Finding Hidden Files "
     cat output/$domain/raw_urls.txt | grep --color=auto -E "\.xls|\.xml|\.xlsx|\.pdf|\.sql|\.doc|\.docx|\.pptx|\.txt|\.zip|\.tar.gz|\.tgz|\.bak|\.7z|\.rar" | anew output/$domain/hidden_files.txt
-
+ 
     echo -e "${BOLD} $BLUE [+]$green Done $BLUE [+] "
-
+ 
 }
 cscan(){ # Make sure installed these gf patterns in ~/.gf/ https://github.com/00xZ/GFpattren
     echo -e "${CYAN}${BOLD}    ~ ${CYAN}[ ${BLUE}Z${CYAN}.${BLUE}S${CYAN}H ${CYAN}] ~ ${NC}"
     echo -e "$BLUE${BOLD} [!] Running Subfinder/GAU to custom GF patterns"
-
+ 
     if [[ ${domain:0:5} == "https" ]]; then
             domain=${domain:8:${#domain}-8}
     elif [[ ${domain:0:4} == "http" ]]; then
@@ -140,16 +139,16 @@ cscan(){ # Make sure installed these gf patterns in ~/.gf/ https://github.com/00
     echo -e "$green [+]$yellow Getting js/json/jsp "
     #cat output/$domain/subs.txt | httpx -silent | anew output/$domain/alive.txt
     cat output/$domain/raw_urls.txt | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew output/$domain/js.txt
-
-
+ 
+ 
     echo $2
     echo -e "$CYAN${BOLD} [+] Parsing With $BLUE(Custom)$CYAN GF ${NC}" #GF is a grep wrapper using a set of paramiters to check for whats most likely to match the given exploit
-
+ 
 # Authentication & Secrets (API keys, OAuth tokens, etc.)
 #cat output/$domain/raw_urls.txt | gf api-keys | anew output/$domain/auth_and_keys.txt
-
+ 
 # httpx -sc -td -title -probe -fhr -location -mc 200
-
+ 
 # Vulnerabilities & Exploitable Patterns (RCE, SQLi, XSS, CSRF, IDOR)
 cat output/$domain/raw_urls.txt | gf rce | anew output/$domain/rce_patterns.txt
 cat output/$domain/raw_urls.txt | gf rce-2 | anew output/$domain/rce_patterns.txt
@@ -165,49 +164,49 @@ cat output/$domain/raw_urls.txt | gf csrf-error | anew output/$domain/csrf.txt
 cat output/$domain/raw_urls.txt | gf idor | anew output/$domain/authorization_patterns.txt
 cat output/$domain/raw_urls.txt | gf ssrf | anew output/$domain/ssrf.txt
 cat output/$domain/raw_urls.txt | gf lfi | anew output/$domain/lfi.txt
-
+ 
     echo -e "$yellow [+]$green Finding Hidden Files "
     cat output/$domain/raw_urls.txt | grep --color=auto -E "\.xls|\.xml|\.xlsx|\.pdf|\.sql|\.doc|\.docx|\.pptx|\.txt|\.zip|\.tar.gz|\.tgz|\.bak|\.7z|\.rar" | anew output/$domain/hidden_files.txt
-
+ 
     echo -e "${BOLD} $BLUE [+]$green Done $BLUE [+] "
-
+ 
 }
 scan_file(){ # Loop through a list of domains from a file
     if [ ! -f "$domain" ]; then
         echo -e "$RED[-] File not found: $domain${NC}"
         exit 1
     fi
-
+ 
     echo -ne "${CYAN}[?] What do you want to name the output folder for the scan? ${NC}"
     read -r outname
-
+ 
     output_dir="output/$outname"
     mkdir -p "$output_dir"
     echo -e "$magenta Output will be stored in: $output_dir$NC\n"
-
+ 
     while IFS= read -r line || [[ -n "$line" ]]; do
         current_domain=$(echo "$line" | sed -E 's|https?://||g' | tr -d '[:space:]')
         echo -e "$BLUE[+] Processing: $current_domain${NC}"
-
+ 
         domain_dir="$output_dir/$current_domain"
         mkdir -p "$domain_dir"
-
+ 
         echo -e "$green [+]$RED Sub Finder "
         subfinder -d "$current_domain" -silent -all | anew "$domain_dir/subs.txt"
-
+ 
         echo -e "$green [+]$RED Checking Subs for 200 "
         cat "$domain_dir/subs.txt" | httpx -sc -td -title -probe -fhr -location  | anew "$domain_dir/subs_deep.txt"
-
+ 
         echo -e "$green [+]$CYAN Get All Urls "
         gau --subs "$current_domain" | anew "$domain_dir/raw_urls.txt"
-
+ 
         echo -e "$green [+]$yellow Getting js/json/jsp "
         cat "$domain_dir/raw_urls.txt" | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew "$domain_dir/js.txt"
-
+ 
         echo -e "$BLUE[+] Done with $current_domain${NC}\n"
-
+ 
     done < "$domain"
-
+ 
     echo -e "$green[✔] Finished scanning all domains in '$domain'.$NC"
 }
 or() {
@@ -252,79 +251,79 @@ xss() {
     cat output/$domain/xss.txt | dalfox pipe | anew output/$domain/VULN_xss.txt
     [ -s output/$domain/VULN_xss.txt ] && echo -e "$yellow${BOLD} [+] FOUND VULN XSS [+] Check output/$domain/VULN_xss.txt for output ${NC}" || echo  -e "$RED [+] No XSS Found[+] ${NC}"
 }
-
+ 
 criplord() {
-
+ 
     #mkdir -p output/$domain/
     echo -e "$green${BOLD} \n [!] Alt-Scanning: \n${NC}"
 # 1. Subdomain enumeration
 echo -e "$CYAN[+] Juicy Subdomain Patterns via Subfinder + DNSX${NC}"
 subfinder -d "$domain" -silent | dnsx -silent | cut -d ' ' -f1 | grep --color 'api\|dev\|stg\|test\|admin\|demo\|stage\|pre\|vpn' | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From BufferOver.run${NC}"
 curl -s "https://dns.bufferover.run/dns?q=.$domain" | jq -r .FDNS_A[] | cut -d',' -f2 | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From Riddler.io${NC}"
 curl -s "https://riddler.io/search/exportcsv?q=pld:$domain" | grep -Po "(([\w.-]*)\.([\w]*)\.([A-z]))\w+" | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From RedHunt Labs API${NC}"
 curl --request GET --url "https://reconapi.redhuntlabs.com/community/v1/domains/subdomains?domain=$domain&page_size=1000" --header 'X-BLOBR-KEY: API_KEY' | jq '.subdomains[]' -r | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From CertSpotter${NC}"
 curl -s "https://api.certspotter.com/v1/issuances?domain=$domain&include_subdomains=true&expand=dns_names" | jq .[].dns_names | grep -Po "(([\w.-]*)\.([\w]*)\.([A-z]))\w+" | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From Wayback Machine${NC}"
 curl -s "http://web.archive.org/cdx/search/cdx?url=*.$domain/*&output=text&fl=original&collapse=urlkey" | sed -e 's_https*://__' -e "s/\/.*//" | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From JLDC Anubis API${NC}"
 curl -s "https://jldc.me/anubis/subdomains/$domain" | grep -Po "((http|https):\/\/)?(([\w.-]*)\.([\w]*)\.([A-z]))\w+" | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From crt.sh${NC}"
 curl -s "https://crt.sh/?q=%25.$domain&output=json" | jq -r '.[].name_value' | sed 's/\*\.//g' | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From ThreatMiner${NC}"
 curl -s "https://api.threatminer.org/v2/domain.php?q=$domain&rt=5" | jq -r '.results[]' | grep -o "\w.*$domain" | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From Anubis again (JSON response)${NC}"
 curl -s "https://jldc.me/anubis/subdomains/$domain" | jq -r '.' | grep -o "\w.*$domain" | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From ThreatCrowd${NC}"
 curl -s "https://www.threatcrowd.org/searchApi/v2/domain/report/?domain=$domain" | jq -r '.subdomains' | grep -o "\w.*$domain" | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From HackerTarget${NC}"
 curl -s "https://api.hackertarget.com/hostsearch/?q=$domain" | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From AlienVault OTX${NC}"
 curl -s "https://otx.alienvault.com/api/v1/indicators/domain/$domain/url_list?limit=100&page=1" | grep -o '"hostname": *"[^"]*' | sed 's/"hostname": "//' | sort -u | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From Censys${NC}"
 censys subdomains "$domain" | anew output/$domain/subs.txt
-
+ 
 echo -e "$CYAN[+] From Subdomain Center${NC}"
 curl -s "https://api.subdomain.center/?domain=$domain" | jq -r '.[]' | sort -u | anew output/$domain/subs.txt
     echo -e "$CYAN [+] Subfinder${NC}"
     #subfinder -d "$domain" -all -silent | anew output/$domain/subs.txt
-
+ 
 # 2. Permutation-based bruteforcing with shuffledns
     echo -e "$CYAN [+] Shuffledns${NC}"
     shuffledns -d "$domain" -r resolvers.txt -w n0kovo_subdomains_huge.txt | anew output/$domain/subs.txt
-
+ 
 # 3. DNS resolution
     echo -e "$CYAN [+] Dnsx${NC}"
     dnsx -l output/$domain/subs.txt -r resolvers.txt -silent | anew output/$domain/resolved.txt
-
+ 
 # 4. Port scanning
     echo -e "$CYAN [+] Naabu${NC}"
     naabu -l output/$domain/resolved.txt -nmap -rate 5000 -silent | anew output/$domain/ports.txt
-
+ 
 # 5. HTTP probing
     echo -e "$CYAN [+] Httpx${NC}"
     httpx -l output/$domain/ports.txt -silent | anew output/$domain/alive.txt
-
+ 
 # 6. Crawling with Katana
     echo -e "$CYAN [+] Katana${NC}"
     katana -list output/$domain/alive.txt -silent -nc -jc -kf all -fx -xhr -ef woff,css,png,svg,jpg,woff2,jpeg,gif,svg -aff | anew output/$domain/urls.txt
-
+ 
 # 7. Vulnerability scanning with Nuclei
     echo -e "$CYAN [+] Nuclei${NC}"
     nuclei -l output/$domain/urls.txt -es info,unknown -ept ssl -ss template-spray | anew output/$domain/nuclei.txt
@@ -351,10 +350,8 @@ elif [ "$1" == "--or" ]; then
     or
 elif [ "$1" == "--xss" ]; then
     xss
-
+ 
 else
     echo -e "${RED}Unknown option: $1 ${NC}"
     help
 fi
-
-#grep -E '\?[^=]+=.+$' |
