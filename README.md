@@ -62,7 +62,7 @@ output/NameOfTheSiteYouScanned.com/
 ./eye.sh --nuke thewebsite.com
 ```
 
-![screenshot](https://github.com/00xZ/eye/blob/main/toolsCustom.PNG?raw=true)
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/toolCustom.PNG?raw=true)
 
 ---
 
