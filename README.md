@@ -46,7 +46,7 @@ output/NameOfTheSiteYouScanned.com/
 ./eye.sh --scan thewebsite.com
 ```
 
-![screenshot](https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(21).png?raw=true)
+![screenshot](https://github.com/00xZ/eye/blob/main/tools/scanning.PMG?raw=true)
 
 ---
 
@@ -62,7 +62,7 @@ output/NameOfTheSiteYouScanned.com/
 ./eye.sh --custom thewebsite.com
 ```
 
-![screenshot](https://github.com/00xZ/eye/blob/main/tools/Screenshot%20(23).png?raw=true)
+![screenshot](https://github.com/00xZ/eye/blob/main/toolsCustom.PPNG?raw=true)
 
 ---
 
