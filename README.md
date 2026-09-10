@@ -86,6 +86,8 @@ To use `eye` fully, install the following tools:
 - **httpx** — https://github.com/projectdiscovery/httpx  
 - **parallel** — https://github.com/parallel-finance/parallel  
 - **gdn** — https://github.com/kmskrishna/gdn  
+- **LFIscanner** -  https://github.com/R3LI4NT/LFIscanner 
+- **TPLmap** - https://github.com/epinna/tplmap 
 
 ---
 
@@ -104,7 +106,5 @@ Do NOT scan systems without proper permission.
 ## ⭐ Contributions & Support  
 Suggestions, improvements, and issues are welcome.  
 Let’s push `eye` to see even more. 👁️✨
-LFIscanner ( https://github.com/R3LI4NT/LFIscanner )
 
-TPLmap ( https://github.com/epinna/tplmap )
  
