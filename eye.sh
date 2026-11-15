@@ -463,6 +463,44 @@ cat output/$domain/raw_urls.txt | gf lfi | anew output/$domain/lfi.txt
     echo -e "${BOLD} $BLUE [+]$green Done $BLUE [+] "
 
 }
+scan_file(){ # Loop through a list of domains from a file
+    if [ ! -f "$domain" ]; then
+        echo -e "$RED[-] File not found: $domain${NC}"
+        exit 1
+    fi
+
+    echo -ne "${CYAN}[?] What do you want to name the output folder for the scan? ${NC}"
+    read -r outname
+
+    output_dir="output/$outname"
+    mkdir -p "$output_dir"
+    echo -e "$magenta Output will be stored in: $output_dir$NC\n"
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        current_domain=$(echo "$line" | sed -E 's|https?://||g' | tr -d '[:space:]')
+        echo -e "$BLUE[+] Processing: $current_domain${NC}"
+
+        domain_dir="$output_dir/$current_domain"
+        mkdir -p "$domain_dir"
+
+        echo -e "$green [+]$RED Sub Finder "
+        subfinder -d "$current_domain" -silent -all | anew "$domain_dir/subs.txt"
+
+        echo -e "$green [+]$RED Checking Subs for 200 "
+        cat "$domain_dir/subs.txt" | httpx -sc -td -title -probe -fhr -location  | anew "$domain_dir/subs_deep.txt"
+
+        echo -e "$green [+]$CYAN Get All Urls "
+        gau --subs "$current_domain" | anew "$domain_dir/raw_urls.txt"
+
+        echo -e "$green [+]$yellow Getting js/json/jsp "
+        cat "$domain_dir/raw_urls.txt" | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew "$domain_dir/js.txt"
+
+        echo -e "$BLUE[+] Done with $current_domain${NC}\n"
+
+    done < "$domain"
+
+    echo -e "$green[✔] Finished scanning all domains in '$domain'.$NC"
+}
 csrf() {
     echo -e "$CYAN${BOLD} \n [!] CSRF Scan: \n${NC}"
     crlfuzz -l output/$domain/subs_alive.txt -o output/$domain/VULN_csrf.txt
@@ -481,7 +519,7 @@ dbinj2() { ## can ignore
     for url in $(cat output/$domain/sqli.txt); do python3 tools/ScanQLi/scanqli.py -u $url -o output/$domain/VULN_sqli; print $url; anew output/$domain/VULN_sqli; done
     [ -s output/$domain/VULN_sqli.txt ] && echo -e "$green${BOLD} [+] FOUND VULN sqli [+] Check output/$domain/VULN_sqli.txt for output ${NC}" || echo -e "$RED [+] No sqli Found[+] ${NC}"
 }
-sqli() {
+sqli_sniper() {
     echo -e "$CYAN${BOLD} \n [!] Injection Database Params: \n${NC}"
     #cat output/$domain/sqli.txt
     python3 tools/SqliSniper/sqlisniper.py --payload tools/SqliSniper/payloads.txt --headers tools/SqliSniper/headers.txt -r output/$domain/sqli.txt | anew output/$domain/VULN_sqli
@@ -489,10 +527,175 @@ sqli() {
     ##run sqlmap here? sure
     #for url in $(cat output/$domain/VULN_sqli.txt); do sqlmap -u $url --batch --level=3 --risk=3 --dump; print $url; anew output/$domain/Database_dump.txt; done
 }
+secrets() {
+    echo -e "$CYAN${BOLD} \n [!] SecretFinder scan on JS files: \n${NC}"
+
+    if [ ! -f output/$domain/js.txt ]; then
+        echo -e "$RED [-] No js.txt found — run --scan/--cscan first.${NC}"
+        return 1
+    fi
+
+    mkdir -p output/$domain/secrets
+
+    echo -e "$green [+]$CYAN Running SecretFinder against each JS file ${NC}"
+    while IFS= read -r js_url || [[ -n "$js_url" ]]; do
+        [ -z "$js_url" ] && continue
+        fname=$(echo "$js_url" | md5sum | cut -d' ' -f1)
+        python3 SecretFinder.py -i "$js_url" -o cli 2>/dev/null | anew output/$domain/secrets/"$fname".txt
+    done < output/$domain/js.txt
+
+    cat output/$domain/secrets/*.txt 2>/dev/null | anew output/$domain/secrets_all.txt
+    found output/$domain/secrets_all.txt "possible secrets"
+}
+
+scope_scan() { # Loop through a list of domains/URLs from a file, merging everything into ONE output folder
+    if [ ! -f "$domain" ]; then
+        echo -e "$RED[-] File not found: $domain${NC}"
+        exit 1
+    fi
+
+    echo -ne "${CYAN}[?] What do you want to name this scope's output folder? ${NC}"
+    read -r outname
+    outname=$(echo "$outname" | tr -d '[:space:]')
+    if [ -z "$outname" ]; then
+        echo -e "$RED[-] Need a folder name.${NC}"
+        return 1
+    fi
+
+    if [ -f output/$outname/raw_urls.txt ]; then
+        echo -e "$yellow${BOLD} [!] output/$outname/raw_urls.txt already exists. Skipping re-scan, re-parsing with current GF patterns.${NC}"
+        echo -e "$yellow     (Delete output/$outname to force a fresh scope scan.)${NC}"
+        domain=$outname
+        gfparse
+        return 0
+    fi
+
+    mkdir -p output/$outname
+    echo -e "$magenta Scope output will be merged into: output/$outname/${NC}\n"
+    trap : SIGINT
+
+    total=$(grep -c . "$domain")
+    count=0
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        target=$(echo "$line" | sed -E 's|https?://||g' | tr -d '[:space:]')
+        [ -z "$target" ] && continue
+        count=$((count+1))
+        echo -e "$BLUE[+] ($count/$total) Processing: $target${NC}"
+
+        echo -e "$green   [+]$RED Subfinder "
+        subfinder -d "$target" -silent -all | anew output/$outname/subs.txt
+
+        echo -e "$green   [+]$CYAN Waymore "
+        waymore -i "$target" -mode U -oU output/$outname/raw_urls_tmp.txt
+        cat output/$outname/raw_urls_tmp.txt 2>/dev/null | anew output/$outname/raw_urls.txt
+        rm -f output/$outname/raw_urls_tmp.txt
+    done < "$domain"
+
+    echo -e "$green [+]$RED Checking merged subs for 200 "
+    cat output/$outname/subs.txt | httpx -sc | grep "200" | awk '{print $1}' | anew output/$outname/subs_200.txt
+
+    echo -e "$green [+]$yellow Pulling JS files from the merged URL list "
+    cat output/$outname/raw_urls.txt | grep -i -E "\.js" | egrep -v "\.json|\.jsp" | anew output/$outname/js.txt
+
+    domain=$outname
+    gfparse
+
+    echo -e "$green[✔] Scope scan complete. Everything merged into output/$outname/ (raw_urls.txt, subs.txt, js.txt, + all gf-pattern files).${NC}"
+    echo -e "$yellow     You can now run --or/--xss/--sqli/--lfi/--nuke/--hailmary against it with: $0 <option> $outname${NC}"
+}
+
+or_nuclei() {
+    echo -e "$CYAN${BOLD} \n [!] Open Redirect Scan: \n${NC}"
+    cat output/$domain/or.txt | uro | qsreplace "https://evil.com" | httpx -silent -fr -mr "https://evil.com" | anew output/$domain/VULN_or.txt
+    cat output/$domain/or.txt | nuclei -tags redirect | anew output/$domain/vuln_nuclei_or.txt
+    found output/$domain/VULN_or.txt "Open Redirect"
+}
+
+nuke_cve() {
+    echo -e "$CYAN${BOLD} \n [!] Nuclei CVE scan: \n${NC}"
+    #nuclei -l output/$domain/subs_200.txt -tags cve -s critical,high,medium,low | anew output/$domain/cve.txt
+    #found output/$domain/cve.txt "CVEs"
+}
+
+sqli_nuclei() {
+    echo -e "$CYAN${BOLD} \n [!] SQL Injection scan: \n${NC}"
+    if [ ! -s output/$domain/sqli.txt ]; then
+        echo -e "$RED [-] No sqli.txt — run --scan/--cscan (or --gf) first.${NC}"
+        return 1
+    fi
+    echo -e "$green [+]$CYAN Quick error-based probe ${NC}"
+    cat output/$domain/sqli.txt | qsreplace "'" | httpx -silent -mr "SQL syntax|mysql_fetch|ORA-01756|PostgreSQL.*ERROR|SQLite/JDBCDriver|Warning.*\Wmysqli?_" | anew output/$domain/sqli_errors.txt
+
+    echo -e "$green [+]$CYAN Nuclei SQLi templates ${NC}"
+    cat output/$domain/sqli.txt | nuclei -tags sqli | anew output/$domain/sqli_vuln.txt
+
+    cat output/$domain/raw_urls.txt | grep -i 'ogin' | anew output/$domain/login_pages.txt
+
+    found output/$domain/sqli_vuln.txt "SQLi"
+}
+lfi_scanner() {
+    echo -e "$CYAN${BOLD} \n [!] LFI Scan: \n$yellow" # check the LFIscanner dir for an output / should edit the LFIscanner.py and have it output the "VULN" to a file
+    for url in $(cat output/$domain/lfi_qsr.txt); do python3 tools/LFIscanner/LFIscanner.py -t $url -p tools/LFIscanner/payloads.txt; print $url; anew output/$domain/VULN_lfi; done
+}
+csrf2() {
+    echo -e "$CYAN${BOLD} \n [!] CSRF Scan: \n${NC}"
+    crlfuzz -l output/$domain/subs_alive.txt -o output/$domain/VULN_csrf.txt
+    [ -s output/$domain/VULN_csrf.txt ] && echo -e "$green${BOLD} [+] FOUND VULN CSRF [+] Check output/$domain/VULN_csrf.txt for output ${NC}" || echo -e "$RED [+] No CSRF Found[+] ${NC}"
+}
+sqli_inj_hbsli() { # ignore
+    echo -e "$CYAN${BOLD} \n [!] Injection Database Params: \n${NC}"
+    cat output/$domain/sqli.txt
+    python3 /root/HBSLI/inject.py -l output/$domain/sqli.txt -p /root/HBSLI/payloads.txt -H /root/HBSLI/headers.txt | anew output/$domain/vVULN_sqli
+    [ -s output/$domain/VULN_sqli.txt ] && echo -e "$green${BOLD} [+] FOUND VULN sqli [+] Check output/$domain/VULN_sqli.txt for output ${NC}" || echo -e "$RED [+] No sqli Found[+] ${NC}"
+}
+sqli_inj_scanqli() { ## can ignore 
+    echo -e "$CYAN${BOLD} \n [!] Injection Database Params: \n${NC}"
+    #cat output/$domain/sqli.txt
+    #python3 /root/HBSLI/inject.py -l output/$domain/sqli.txt -p /root/HBSLI/payloads.txt -H /root/HBSLI/headers.txt | anew output/$domain/vVULN_sqli
+    for url in $(cat output/$domain/sqli.txt); do python3 tools/ScanQLi/scanqli.py -u $url -o output/$domain/VULN_sqli; print $url; anew output/$domain/VULN_sqli; done
+    [ -s output/$domain/VULN_sqli.txt ] && echo -e "$green${BOLD} [+] FOUND VULN sqli [+] Check output/$domain/VULN_sqli.txt for output ${NC}" || echo -e "$RED [+] No sqli Found[+] ${NC}"
+}
+sqli_sniper() {
+    echo -e "$CYAN${BOLD} \n [!] Injection Database Params: \n${NC}"
+    #cat output/$domain/sqli.txt
+    python3 tools/SqliSniper/sqlisniper.py --payload tools/SqliSniper/payloads.txt --headers tools/SqliSniper/headers.txt -r output/$domain/sqli.txt | anew output/$domain/VULN_sqli
+    [ -s output/$domain/VULN_sqli.txt ] && echo -e "$green${BOLD} [+] FOUND VULN sqli [+] Check output/$domain/VULN_sqli.txt for output ${NC}" || echo -e "$RED [+] No sqli Found[+] ${NC}"
+    ##run sqlmap here? sure
+    #
+}
+lfi_nuclei() {
+    echo -e "$CYAN${BOLD} \n [!] LFI scan: \n${NC}"
+    if [ ! -s output/$domain/lfi.txt ]; then
+        echo -e "$RED [-] No lfi.txt — run --scan/--cscan (or --gf) first.${NC}"
+        return 1
+    fi
+    cat output/$domain/lfi.txt | nuclei -tags lfi | anew output/$domain/lfi_vuln.txt
+    cat output/$domain/img_traversal.txt 2>/dev/null | nuclei -tags lfi,traversal | anew output/$domain/lfi_vuln.txt
+    found output/$domain/lfi_vuln.txt "LFI"
+}
+
+crlffuzz() {
+    echo -e "$CYAN${BOLD} \n [!] CRLF scan: \n${NC}"
+    if [ ! -s output/$domain/xss.txt ]; then
+        echo -e "$RED [-] No xss.txt yet — run --xss first (crlf reuses that URL list).${NC}"
+        return 1
+    fi
+    crlfuzz --list output/$domain/xss.txt --output output/$domain/crlf-results.txt
+    found output/$domain/crlf-results.txt "CRLF"
+}
+
+dalfox() {
+    echo -e "$CYAN${BOLD} \n [!] DALFOX scan: \n${NC}"
+    cat output/$domain/or.txt 2>/dev/null | dalfox pipe --custom-payload 'https://example.com@evil.com' --custom-payload 'evil.com%2F' --grep 'evil.com' | anew output/$domain/or_vuln.txt
+    cat output/$domain/raw_urls.txt | grep "?" | grep -i "php" | dalfox pipe --custom-payload '{{7*7}}' --grep '49' | anew output/$domain/dalfox_vuln.txt
+    found output/$domain/dalfox_vuln.txt "Dalfox hits"
+}
 if [ "$1" == "--scan" ]; then
     vuln1
 elif [ "$1" == "--scan-deep" ]; then
     dcan
+elif [ "$1" == "--scan-file" ]; then
+    scan_file
 elif [ "$1" == "--exploit" ]; then
     vuln2
 elif [ "$1" == "--lscan" ]; then
